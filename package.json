@@ -8,7 +8,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "db:push": "npx supabase db push",
+    "db:link": "npx supabase link",
+    "db:status": "npx supabase migration list"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
@@ -44,6 +47,7 @@
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "supabase": "^2.51.0",
     "typescript": "~5.9.2"
   },
   "private": true
