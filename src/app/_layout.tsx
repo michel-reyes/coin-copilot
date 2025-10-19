@@ -1,14 +1,17 @@
 import { Stack } from "expo-router";
 
 import { SessionProvider, useSession } from "@/app/context/authContext";
+import { NotificationProvider } from "@/app/context/notificationContext";
 import { SplashScreenController } from "@/app/splash";
 
 export default function RootLayout() {
   return (
     <>
       <SessionProvider>
-        <SplashScreenController />
-        <RootNavigator />
+        <NotificationProvider>
+          <SplashScreenController />
+          <RootNavigator />
+        </NotificationProvider>
       </SessionProvider>
     </>
   );
