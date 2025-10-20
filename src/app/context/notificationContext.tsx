@@ -1,22 +1,13 @@
 import { createContext, use, useEffect, type PropsWithChildren } from 'react';
 
-import { useNotifications, type NotificationHookState } from '@/app/hooks/useNotifications';
+import { useNotifications } from '@/app/hooks/useNotifications';
 import { setupNotificationHandler } from '@/app/lib/notifications';
 
-type NotificationContextType = NotificationHookState & {
-  /**
-   * Schedule a local notification for testing purposes
-   */
-  scheduleTestNotification: () => Promise<void>;
-};
-
-const NotificationContext = createContext<NotificationContextType>({
+const NotificationContext = createContext({
   expoPushToken: '',
-  notification: undefined,
-  channels: [],
+  notification: undefined as any,
   isLoading: false,
-  error: null,
-  scheduleTestNotification: async () => {},
+  error: null as string | null,
 });
 
 /**
@@ -25,7 +16,9 @@ const NotificationContext = createContext<NotificationContextType>({
 export function useNotificationContext() {
   const value = use(NotificationContext);
   if (!value) {
-    throw new Error('useNotificationContext must be wrapped in a <NotificationProvider />');
+    throw new Error(
+      'useNotificationContext must be wrapped in a <NotificationProvider />'
+    );
   }
   return value;
 }
@@ -55,23 +48,13 @@ export function NotificationProvider({ children }: PropsWithChildren) {
     }
   }, [notificationState.error]);
 
-  const scheduleTestNotification = async () => {
-    const { scheduleLocalNotification } = await import('@/app/lib/notifications');
-    await scheduleLocalNotification(
-      'Test Notification',
-      'This is a test notification from Coin Copilot!',
-      2
-    );
-  };
-
   return (
-    <NotificationContext
+    <NotificationContext.Provider
       value={{
         ...notificationState,
-        scheduleTestNotification,
       }}
     >
       {children}
-    </NotificationContext>
+    </NotificationContext.Provider>
   );
 }

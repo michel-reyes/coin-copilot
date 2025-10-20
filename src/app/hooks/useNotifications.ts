@@ -7,7 +7,6 @@ import { Platform } from 'react-native';
 export interface NotificationHookState {
   expoPushToken: string;
   notification: Notifications.Notification | undefined;
-  channels: Notifications.NotificationChannel[];
   isLoading: boolean;
   error: string | null;
 }
@@ -17,34 +16,38 @@ export function useNotifications(): NotificationHookState {
   const [notification, setNotification] = useState<
     Notifications.Notification | undefined
   >(undefined);
-  const [channels, setChannels] = useState<Notifications.NotificationChannel[]>(
-    []
-  );
+  const [lastNotificationResponse, setLastNotificationResponse] = useState<
+    Notifications.NotificationResponse | undefined
+  >(undefined);
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const notificationListener = useRef<Notifications.EventSubscription | undefined>(undefined);
-  const responseListener = useRef<Notifications.EventSubscription | undefined>(undefined);
+  const notificationListener = useRef<Notifications.EventSubscription>(null);
+  const responseListener = useRef<Notifications.EventSubscription>(null);
 
   useEffect(() => {
     registerForPushNotificationsAsync();
 
-    // Set up notification listeners
+    // Listen for notifications received while app is foregrounded
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         setNotification(notification);
       });
 
+    // Listen for user interactions with notifications
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
+        setLastNotificationResponse(response);
         console.log('Notification response:', response);
-      });
 
-    if (Platform.OS === 'android') {
-      Notifications.getNotificationChannelsAsync().then((value) =>
-        setChannels(value ?? [])
-      );
-    }
+        // Handle deep linking if URL is provided in notification data
+        const url = response.notification.request.content.data?.url;
+        if (url && typeof url === 'string') {
+          // You can add navigation logic here
+          console.log('Navigate to:', url);
+        }
+      });
 
     return () => {
       if (notificationListener.current) {
@@ -63,12 +66,15 @@ export function useNotifications(): NotificationHookState {
       let token;
 
       if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
-          name: 'Default Notifications',
-          importance: Notifications.AndroidImportance.MAX,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF231F7C',
-        });
+        await Notifications.setNotificationChannelAsync(
+          'remindersNotificationChannel',
+          {
+            name: 'Reminders Notifications',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+          }
+        );
       }
 
       if (Device.isDevice) {
@@ -90,9 +96,7 @@ export function useNotifications(): NotificationHookState {
           Constants?.easConfig?.projectId;
 
         if (!projectId) {
-          throw new Error(
-            'Project ID not found. Please set up your EAS project ID in app.json'
-          );
+          throw new Error('Project ID not found');
         }
 
         token = (
@@ -136,7 +140,6 @@ export function useNotifications(): NotificationHookState {
   return {
     expoPushToken,
     notification,
-    channels,
     isLoading,
     error,
   };

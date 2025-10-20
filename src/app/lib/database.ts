@@ -26,24 +26,25 @@ export interface UserApiKey {
  * @throws Error if user is not authenticated or database operation fails
  */
 export async function saveLunchMoneyApiKey(apiKey: string): Promise<void> {
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
   if (userError || !user) {
     throw new Error('User must be authenticated to save API key');
   }
 
-  const { error } = await supabase
-    .from('user_api_keys')
-    .upsert(
-      {
-        user_id: user.id,
-        lunch_money_api_key: apiKey,
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: 'user_id',
-      }
-    );
+  const { error } = await supabase.from('user_api_keys').upsert(
+    {
+      user_id: user.id,
+      lunch_money_api_key: apiKey,
+      updated_at: new Date().toISOString(),
+    },
+    {
+      onConflict: 'user_id',
+    }
+  );
 
   if (error) {
     console.error('Error saving API key to database:', error);
@@ -58,7 +59,10 @@ export async function saveLunchMoneyApiKey(apiKey: string): Promise<void> {
  * @throws Error if user is not authenticated or database operation fails
  */
 export async function getLunchMoneyApiKey(): Promise<string | null> {
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
   if (userError || !user) {
     throw new Error('User must be authenticated to retrieve API key');
@@ -89,7 +93,10 @@ export async function getLunchMoneyApiKey(): Promise<string | null> {
  * @throws Error if user is not authenticated or database operation fails
  */
 export async function deleteLunchMoneyApiKey(): Promise<void> {
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
   if (userError || !user) {
     throw new Error('User must be authenticated to delete API key');

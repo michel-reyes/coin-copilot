@@ -1,30 +1,48 @@
-import { Text, View, Button } from 'react-native';
-
-import { useSession } from '@/app/context/authContext';
+import { useNotificationContext } from '@/app/context/notificationContext';
+import { Button, Text, View } from 'react-native';
 
 export default function Index() {
-  const { signOut, session, lunchMoneyApiKey } = useSession();
+  const { expoPushToken, notification } = useNotificationContext();
+
+  async function sendPushNotification(expoPushToken: string) {
+    const message = {
+      to: expoPushToken,
+      sound: 'default',
+      title: 'Original Title',
+      body: 'And here is the body!',
+      data: { someData: 'goes here' },
+    };
+
+    await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(message),
+    });
+  }
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>
-        Welcome to Coin Copilot
-      </Text>
-
-      <View style={{ marginBottom: 20 }}>
-        <Text style={{ fontSize: 16, marginBottom: 10 }}>
-          User ID: {session?.user?.id?.substring(0, 8)}...
+    <View
+      style={{ flex: 1, alignItems: 'center', justifyContent: 'space-around' }}
+    >
+      <Text>Your Expo push token: {expoPushToken}</Text>
+      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <Text>
+          Title: {notification && notification.request.content.title}{' '}
         </Text>
-        <Text style={{ fontSize: 16, marginBottom: 10 }}>
-          API Key Status: {lunchMoneyApiKey ? '✓ Connected' : '✗ Not found'}
+        <Text>Body: {notification && notification.request.content.body}</Text>
+        <Text>
+          Data:{' '}
+          {notification && JSON.stringify(notification.request.content.data)}
         </Text>
       </View>
-
       <Button
-        title="Sign Out"
+        title='Press to Send Notification'
         onPress={async () => {
-          // The auth state change redirects to the sign-in screen
-          await signOut();
+          await sendPushNotification(expoPushToken);
         }}
       />
     </View>

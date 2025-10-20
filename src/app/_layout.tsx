@@ -1,8 +1,8 @@
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
 
-import { SessionProvider, useSession } from "@/app/context/authContext";
-import { NotificationProvider } from "@/app/context/notificationContext";
-import { SplashScreenController } from "@/app/splash";
+import { SessionProvider, useSession } from '@/app/context/authContext';
+import { NotificationProvider } from '@/app/context/notificationContext';
+import SplashScreenController from '@/app/splash';
 
 export default function RootLayout() {
   return (
@@ -24,12 +24,12 @@ function RootNavigator() {
   return (
     <Stack>
       <Stack.Protected guard={!!session}>
-        <Stack.Screen name="(private)" />
+        <Stack.Screen name='(private)' />
       </Stack.Protected>
 
       <Stack.Protected guard={!session}>
-        <Stack.Screen name="sign-in" />
+        <Stack.Screen name='sign-in' />
       </Stack.Protected>
     </Stack>
-  )
+  );
 }

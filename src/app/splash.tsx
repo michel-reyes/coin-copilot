@@ -3,7 +3,7 @@ import { SplashScreen } from 'expo-router';
 
 SplashScreen.preventAutoHideAsync();
 
-export function SplashScreenController() {
+export default function SplashScreenController() {
   const { isLoading } = useSession();
 
   if (!isLoading) {

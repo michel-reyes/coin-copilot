@@ -6,9 +6,10 @@ import * as Notifications from 'expo-notifications';
 export function setupNotificationHandler() {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
     }),
   });
 }
@@ -27,7 +28,10 @@ export async function scheduleLocalNotification(
       body,
       data: { data: 'goes here' },
     },
-    trigger: { seconds },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds,
+    },
   });
 }
 

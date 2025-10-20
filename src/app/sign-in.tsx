@@ -1,4 +1,11 @@
-import { Button, Text, TextInput, View, ActivityIndicator, Alert } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Button,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { useSession } from '@/app/context/authContext';
 import { useState } from 'react';
@@ -28,9 +35,10 @@ export default function SignIn() {
       console.error('Sign in error:', error);
 
       // Show user-friendly error message
-      const errorMessage = error instanceof Error
-        ? error.message
-        : 'Failed to sign in. Please try again.';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Failed to sign in. Please try again.';
 
       Alert.alert('Sign In Failed', errorMessage);
     } finally {
@@ -39,7 +47,14 @@ export default function SignIn() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+      }}
+    >
       <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>
         Coin Copilot
       </Text>
@@ -58,27 +73,34 @@ export default function SignIn() {
           marginBottom: 20,
           fontSize: 16,
         }}
-        placeholder="Lunch Money API key"
-        placeholderTextColor="#999"
+        placeholder='Lunch Money API key'
+        placeholderTextColor='#999'
         onChangeText={setApiKey}
         value={apiKey}
-        autoCapitalize="none"
+        autoCapitalize='none'
         autoCorrect={false}
         editable={!isLoading}
         secureTextEntry={true}
       />
 
       {isLoading ? (
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size='large' color='#007AFF' />
       ) : (
         <Button
-          title="Sign In"
+          title='Sign In'
           onPress={handleSignIn}
           disabled={!apiKey || apiKey.trim().length === 0}
         />
       )}
 
-      <Text style={{ fontSize: 12, color: '#666', marginTop: 20, textAlign: 'center' }}>
+      <Text
+        style={{
+          fontSize: 12,
+          color: '#666',
+          marginTop: 20,
+          textAlign: 'center',
+        }}
+      >
         Your API key is stored securely and encrypted.
       </Text>
     </View>

@@ -1,4 +1,10 @@
-import { createContext, use, useEffect, useState, type PropsWithChildren } from 'react';
+import {
+  createContext,
+  use,
+  useEffect,
+  useState,
+  type PropsWithChildren,
+} from 'react';
 import type { Session } from '@supabase/supabase-js';
 
 import { supabase } from '@/app/lib/supabase';
@@ -43,8 +49,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
       // If session exists, fetch the API key from database
       if (session) {
         getLunchMoneyApiKey()
-          .then(apiKey => setLunchMoneyApiKey(apiKey))
-          .catch(error => console.error('Error fetching API key:', error))
+          .then((apiKey) => setLunchMoneyApiKey(apiKey))
+          .catch((error) => console.error('Error fetching API key:', error))
           .finally(() => setIsLoading(false));
       } else {
         setIsLoading(false);
@@ -60,8 +66,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
       // Fetch API key when user signs in
       if (session) {
         getLunchMoneyApiKey()
-          .then(apiKey => setLunchMoneyApiKey(apiKey))
-          .catch(error => console.error('Error fetching API key:', error));
+          .then((apiKey) => setLunchMoneyApiKey(apiKey))
+          .catch((error) => console.error('Error fetching API key:', error));
       } else {
         setLunchMoneyApiKey(null);
       }
@@ -100,7 +106,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         if (signUpResult.data.session && signUpResult.data.user) {
           data = {
             session: signUpResult.data.session,
-            user: signUpResult.data.user
+            user: signUpResult.data.user,
           };
         } else {
           data = { session: null, user: null };
