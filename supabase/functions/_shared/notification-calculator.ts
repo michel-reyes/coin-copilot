@@ -104,9 +104,11 @@ export function getNextOccurrence(
   const dueDate = parseDate(event.due_date); // Fix timezone issue
   const checkDate = new Date(fromDate);
 
-  // For one-time events, return due date if it's in the future
+  // For one-time events, always return the due date
+  // The caller (edge function) will filter by time window (24-hour catchup)
+  // This allows notifications to be sent for events created after their due date
   if (event.recurrence_type === 'one_time') {
-    return checkDate <= dueDate ? dueDate : null;
+    return dueDate;
   }
 
   // For recurring events, find next occurrence within next 365 days

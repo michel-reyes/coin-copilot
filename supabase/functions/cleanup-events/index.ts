@@ -181,9 +181,43 @@ Deno.serve(async (req) => {
     }
 
     // ========================================
-    // STEP 6: Delete old notifications (45-day retention)
+    // STEP 6: Delete orphaned notification schedules
     // ========================================
-    console.log('Step 6: Deleting old notification history (45-day retention)...');
+    console.log('Step 6: Deleting orphaned notification schedules...');
+
+    // Delete schedules that reference non-existent events
+    const { data: orphanedSchedules, error: orphanedError } = await supabaseAdmin
+      .rpc('delete_orphaned_schedules');
+
+    if (orphanedError) {
+      // If the function doesn't exist, try direct query
+      console.log('RPC function not available, using direct query for orphaned schedules...');
+
+      const { data: orphaned, error: directOrphanedError } = await supabaseAdmin
+        .from('event_notification_schedules')
+        .delete()
+        .not('event_id', 'in', `(SELECT id FROM events)`)
+        .select('id');
+
+      if (directOrphanedError) {
+        const errorMsg = `Error deleting orphaned schedules: ${directOrphanedError.message}`;
+        console.error(errorMsg);
+        result.errors.push(errorMsg);
+      } else {
+        const orphanedCount = orphaned?.length || 0;
+        console.log(`Deleted ${orphanedCount} orphaned notification schedules`);
+        result.deleted_schedules_count += orphanedCount;
+      }
+    } else {
+      const orphanedCount = orphanedSchedules?.[0]?.count || 0;
+      console.log(`Deleted ${orphanedCount} orphaned notification schedules`);
+      result.deleted_schedules_count += orphanedCount;
+    }
+
+    // ========================================
+    // STEP 7: Delete old notifications (45-day retention)
+    // ========================================
+    console.log('Step 7: Deleting old notification history (45-day retention)...');
 
     // Calculate cutoff date (45 days ago)
     const retentionDays = 45;
