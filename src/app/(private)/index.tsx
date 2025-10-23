@@ -1,8 +1,11 @@
+import { useSession } from '@/app/context/authContext';
 import { useNotificationContext } from '@/app/context/notificationContext';
+import { Link } from 'expo-router';
 import { Button, Text, View } from 'react-native';
 
 export default function Index() {
   const { expoPushToken, notification } = useNotificationContext();
+  const { signOut } = useSession();
 
   async function sendPushNotification(expoPushToken: string) {
     const message = {
@@ -38,7 +41,11 @@ export default function Index() {
           Data:{' '}
           {notification && JSON.stringify(notification.request.content.data)}
         </Text>
+        <Link href='/(private)/events'>
+          <Text>go events</Text>
+        </Link>
       </View>
+      <Button title='sibg out' onPress={signOut} />
       <Button
         title='Press to Send Notification'
         onPress={async () => {
