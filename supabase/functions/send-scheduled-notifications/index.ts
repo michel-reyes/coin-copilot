@@ -317,36 +317,68 @@ Deno.serve(async (req) => {
 
 /**
  * Filter out notifications that have already been sent today
+ * Uses batched query for performance (1 query instead of N queries)
  */
 async function filterDuplicateNotifications(
   supabase: any,
   notifications: ReturnType<typeof calculatePendingNotifications>
 ): Promise<typeof notifications> {
-  const unique: typeof notifications = [];
+  if (notifications.length === 0) {
+    return [];
+  }
 
-  for (const notification of notifications) {
-    // Check if we already have a sent/pending notification for this event today
+  // Build array of checks to perform
+  const checks = notifications.map((notification) => {
     const scheduledDate = new Date(notification.notification_datetime);
     const dateStr = scheduledDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
-    const { data: existing } = await supabase
-      .from('notification_queue')
-      .select('id')
-      .eq('user_id', notification.event.user_id)
-      .eq('event_id', notification.event.id)
-      .gte('scheduled_for', `${dateStr}T00:00:00Z`)
-      .lt('scheduled_for', `${dateStr}T23:59:59Z`)
-      .in('status', ['sent', 'pending'])
-      .limit(1);
+    return {
+      event_id: notification.event.id,
+      user_id: notification.event.user_id,
+      date: dateStr,
+    };
+  });
 
-    if (!existing || existing.length === 0) {
-      unique.push(notification);
-    } else {
+  console.log(`Checking ${checks.length} notifications for duplicates (batched query)...`);
+
+  // Call batch deduplication function (single query!)
+  const { data: alreadySent, error } = await supabase.rpc(
+    'check_notifications_sent_batch',
+    { p_checks: checks }
+  );
+
+  if (error) {
+    console.error('Error checking for duplicates:', error);
+    // Fall back to sending all (better to risk duplicate than miss a notification)
+    return notifications;
+  }
+
+  // Create a Set for fast lookup of already-sent notifications
+  const sentKeys = new Set(
+    (alreadySent || []).map(
+      (item: { event_id: string; user_id: string; date: string }) =>
+        `${item.event_id}|${item.user_id}|${item.date}`
+    )
+  );
+
+  // Filter out already-sent notifications
+  const unique = notifications.filter((notification) => {
+    const scheduledDate = new Date(notification.notification_datetime);
+    const dateStr = scheduledDate.toISOString().split('T')[0];
+    const key = `${notification.event.id}|${notification.event.user_id}|${dateStr}`;
+
+    const wasSent = sentKeys.has(key);
+    if (wasSent) {
       console.log(
         `Skipping duplicate notification for event ${notification.event.id} on ${dateStr}`
       );
     }
-  }
+    return !wasSent;
+  });
+
+  console.log(
+    `Filtered out ${notifications.length - unique.length} duplicates, ${unique.length} unique notifications to send`
+  );
 
   return unique;
 }
