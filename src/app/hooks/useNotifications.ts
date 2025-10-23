@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
+import { supabase } from '@/app/lib/supabase';
 
 export interface NotificationHookState {
   expoPushToken: string;
@@ -106,6 +107,33 @@ export function useNotifications(): NotificationHookState {
         ).data;
 
         setExpoPushToken(token);
+
+        // Register push token in database via edge function
+        try {
+          const { data, error: registerError } = await supabase.functions.invoke(
+            'register-push-token',
+            {
+              body: {
+                expo_push_token: token,
+                device_info: {
+                  platform: Platform.OS,
+                  device_name: Device.deviceName || 'Unknown',
+                  app_version: Constants.expoConfig?.version || 'Unknown',
+                },
+              },
+            }
+          );
+
+          if (registerError) {
+            console.error('Error registering push token in database:', registerError);
+            // Don't throw - this is non-critical, user can still use the app
+          } else {
+            console.log('Push token registered successfully:', data);
+          }
+        } catch (dbError) {
+          console.error('Failed to register push token in database:', dbError);
+          // Don't throw - this is non-critical
+        }
       } else {
         throw new Error('Must use physical device for Push Notifications');
       }
