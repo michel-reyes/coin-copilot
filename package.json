@@ -5,6 +5,7 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
+    "template:create": "node ./scripts/create-template.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",

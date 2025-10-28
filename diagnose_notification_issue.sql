@@ -116,7 +116,7 @@ LIMIT 5;
 
 -- 9. Check edge function invocations (if available)
 SELECT '=== EDGE FUNCTION LOGS ===' as section;
-SELECT 'Go to: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/functions/send-scheduled-notifications/invocations';
+SELECT 'Go to: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/functions/send-scheduled-notifications/invocations';
 
 -- 10. Test the batch deduplication function
 SELECT '=== TEST BATCH FUNCTION ===' as section;

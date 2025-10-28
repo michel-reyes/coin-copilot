@@ -20,7 +20,7 @@ The cleanup job will:
 
 ## Step 1: Get Your Service Role Key
 
-1. Go to: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/settings/api
+1. Go to: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/settings/api
 2. Find the **`service_role` secret** key (NOT the anon key)
 3. Copy it (starts with `eyJ...`)
 
@@ -36,14 +36,14 @@ npx supabase functions deploy cleanup-events
 
 You should see output like:
 ```
-Deploying cleanup-events (project ref: ftjovjfauzamebmzetfr)
+Deploying cleanup-events (project ref: YOUR_SUPABASE_PROJECT_REF)
 ...
 Deployed Function cleanup-events
 ```
 
 ## Step 3: Run the SQL to Create Cron Job
 
-1. Go to the SQL Editor: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/sql/new
+1. Go to the SQL Editor: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/sql/new
 2. Copy and paste the SQL below
 3. **Replace `YOUR_SERVICE_ROLE_KEY_HERE`** with the key from Step 1
 4. Click **Run**
@@ -72,7 +72,7 @@ SELECT cron.schedule(
   '5 * * * *',  -- Every hour at :05 minutes past the hour
   $$
   SELECT net.http_post(
-    url := 'https://ftjovjfauzamebmzetfr.supabase.co/functions/v1/cleanup-events',
+    url := 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/cleanup-events',
     headers := jsonb_build_object(
       'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY_HERE',
       'Content-Type', 'application/json'
@@ -103,7 +103,7 @@ cleanup-events-hourly | 5 * * * *  | t      | 12345
 Run in SQL Editor:
 ```sql
 SELECT net.http_post(
-  url := 'https://ftjovjfauzamebmzetfr.supabase.co/functions/v1/cleanup-events',
+  url := 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/cleanup-events',
   headers := jsonb_build_object(
     'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY_HERE',
     'Content-Type', 'application/json'
@@ -118,7 +118,7 @@ You should see `status_code: 200` in the response.
 
 After the cron job runs, check the logs:
 
-1. Go to: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/functions/cleanup-events/invocations
+1. Go to: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/functions/cleanup-events/invocations
 2. Look for a successful invocation
 3. Click on it to see the logs showing what was cleaned up
 
@@ -164,7 +164,7 @@ LIMIT 5;
 UPDATE cron.job
 SET command = $$
   SELECT net.http_post(
-    url := 'https://ftjovjfauzamebmzetfr.supabase.co/functions/v1/cleanup-events',
+    url := 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/cleanup-events',
     headers := jsonb_build_object(
       'Authorization', 'Bearer YOUR_CORRECT_SERVICE_ROLE_KEY_HERE',
       'Content-Type', 'application/json'
@@ -196,7 +196,7 @@ WHERE jobname = 'cleanup-events-hourly';
 
 To see what's being cleaned up, check the function logs after each run:
 
-1. Go to: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/functions/cleanup-events/invocations
+1. Go to: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/functions/cleanup-events/invocations
 2. Click on any invocation
 3. Look for logs like:
    ```

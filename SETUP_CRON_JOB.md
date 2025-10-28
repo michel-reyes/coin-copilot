@@ -9,7 +9,7 @@
   - `register-push-token` (v1)
   - `send-scheduled-notifications` (v1)
 
-**View your functions**: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/functions
+**View your functions**: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/functions
 
 ---
 
@@ -19,7 +19,7 @@ You need to configure the cron job to automatically run the notification process
 
 ### Method 1: Supabase Dashboard (Recommended - 2 minutes)
 
-1. Go to: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/database/cron-jobs
+1. Go to: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/database/cron-jobs
 
 2. Click **"Create a new cron job"**
 
@@ -51,7 +51,7 @@ SELECT cron.schedule(
   '0 * * * *', -- Every hour at minute 0
   $$
   SELECT net.http_post(
-    url := 'https://ftjovjfauzamebmzetfr.supabase.co/functions/v1/send-scheduled-notifications',
+    url := 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/send-scheduled-notifications',
     headers := jsonb_build_object(
       'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY',
       'Content-Type', 'application/json'
@@ -62,7 +62,7 @@ SELECT cron.schedule(
 ```
 
 **Note**: Replace `YOUR_SERVICE_ROLE_KEY` with your actual service role key from:
-https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/settings/api
+https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/settings/api
 
 ---
 
@@ -107,7 +107,7 @@ SELECT * FROM cron.job WHERE jobname = 'send-scheduled-notifications';
 - Or manually trigger the function:
 
 ```bash
-curl -X POST https://ftjovjfauzamebmzetfr.supabase.co/functions/v1/send-scheduled-notifications \
+curl -X POST https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/send-scheduled-notifications \
   -H "Authorization: Bearer YOUR_SERVICE_ROLE_KEY"
 ```
 
@@ -149,7 +149,7 @@ LIMIT 20;
 
 ### Check Function Logs
 
-Dashboard: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/functions/send-scheduled-notifications/logs
+Dashboard: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/functions/send-scheduled-notifications/logs
 
 ### Verify Tables
 

@@ -3,7 +3,7 @@
 -- ============================================
 --
 -- INSTRUCTIONS:
--- 1. Get your service role key from: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/settings/api
+-- 1. Get your service role key from: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/settings/api
 -- 2. Replace YOUR_SERVICE_ROLE_KEY_HERE below with the actual key
 -- 3. Run this SQL in the SQL Editor
 -- 4. Check the result to see what was cleaned up
@@ -22,7 +22,7 @@ ORDER BY recurrence_type, is_active;
 
 -- Call the cleanup function
 SELECT net.http_post(
-  url := 'https://ftjovjfauzamebmzetfr.supabase.co/functions/v1/cleanup-events',
+  url := 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/cleanup-events',
   headers := jsonb_build_object(
     'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY_HERE',
     'Content-Type', 'application/json'

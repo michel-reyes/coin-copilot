@@ -41,7 +41,7 @@ ORDER BY notification_should_send_at DESC;
 -- Step 3: Manually trigger the edge function to test
 SELECT '=== TRIGGER EDGE FUNCTION ===' as section;
 SELECT 'Run this in a separate query after replacing YOUR_SERVICE_ROLE_KEY:' as instruction;
-SELECT 'SELECT net.http_post(url := ''https://ftjovjfauzamebmzetfr.supabase.co/functions/v1/send-scheduled-notifications'', headers := jsonb_build_object(''Authorization'', ''Bearer YOUR_SERVICE_ROLE_KEY'', ''Content-Type'', ''application/json''), body := ''{}''::jsonb);' as query_to_run;
+SELECT 'SELECT net.http_post(url := ''https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/send-scheduled-notifications'', headers := jsonb_build_object(''Authorization'', ''Bearer YOUR_SERVICE_ROLE_KEY'', ''Content-Type'', ''application/json''), body := ''{}''::jsonb);' as query_to_run;
 
 -- Step 4: Wait a moment, then check notification_queue
 SELECT '=== AFTER RUNNING EDGE FUNCTION, CHECK QUEUE ===' as section;

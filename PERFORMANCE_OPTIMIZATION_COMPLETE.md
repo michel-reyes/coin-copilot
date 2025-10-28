@@ -106,7 +106,7 @@ Prepared 38 push messages
 
 ### Step 1: Run the Migration
 
-1. Go to **SQL Editor**: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/sql/new
+1. Go to **SQL Editor**: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/sql/new
 2. Copy the **entire contents** of `supabase/migrations/20251022030000_optimize_notifications.sql`
 3. Paste and click **Run**
 
@@ -168,7 +168,7 @@ Should return: `(0 rows)` (since that's a fake UUID)
 #### Test cleanup-events
 ```sql
 SELECT net.http_post(
-  url := 'https://ftjovjfauzamebmzetfr.supabase.co/functions/v1/cleanup-events',
+  url := 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/cleanup-events',
   headers := jsonb_build_object(
     'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY_HERE',
     'Content-Type', 'application/json'
@@ -177,12 +177,12 @@ SELECT net.http_post(
 );
 ```
 
-Check logs: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/functions/cleanup-events/invocations
+Check logs: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/functions/cleanup-events/invocations
 
 #### Test send-scheduled-notifications
 ```sql
 SELECT net.http_post(
-  url := 'https://ftjovjfauzamebmzetfr.supabase.co/functions/v1/send-scheduled-notifications',
+  url := 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co/functions/v1/send-scheduled-notifications',
   headers := jsonb_build_object(
     'Authorization', 'Bearer YOUR_SERVICE_ROLE_KEY_HERE',
     'Content-Type', 'application/json'
@@ -191,7 +191,7 @@ SELECT net.http_post(
 );
 ```
 
-Check logs: https://supabase.com/dashboard/project/ftjovjfauzamebmzetfr/functions/send-scheduled-notifications/invocations
+Check logs: https://supabase.com/dashboard/project/YOUR_SUPABASE_PROJECT_REF/functions/send-scheduled-notifications/invocations
 
 Look for the new log message: `"Checking X notifications for duplicates (batched query)..."`
 
