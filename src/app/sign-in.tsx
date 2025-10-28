@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 
-import { useSession } from '@/app/context/authContext';
+import { useSession } from '@/src/context/authContext';
 import { useState } from 'react';
 
 export default function SignIn() {

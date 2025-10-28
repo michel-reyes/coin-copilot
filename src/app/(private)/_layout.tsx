@@ -1,4 +1,4 @@
-import colors from '@/app/themes/colors';
+import colors from '@/src/themes/colors';
 import { Stack } from 'expo-router';
 
 export default function AppLayout() {

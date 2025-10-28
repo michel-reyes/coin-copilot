@@ -2,9 +2,9 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import '../global.css';
 
-import { SessionProvider, useSession } from '@/app/context/authContext';
-import { NotificationProvider } from '@/app/context/notificationContext';
-import SplashScreenController from '@/app/splash';
+import { SessionProvider, useSession } from '@/src/context/authContext';
+import { NotificationProvider } from '@/src/context/notificationContext';
+import SplashScreenController from '@/src/splash';
 
 export default function RootLayout() {
   return (
