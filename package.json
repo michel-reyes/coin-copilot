@@ -21,6 +21,8 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@supabase/supabase-js": "^2.75.1",
+    "@tanstack/react-query": "^5.90.5",
+    "axios": "^1.13.0",
     "clsx": "^2.1.1",
     "expo": "~54.0.13",
     "expo-constants": "~18.0.9",
@@ -52,6 +54,7 @@
     "uniwind": "^1.0.0-rc.6"
   },
   "devDependencies": {
+    "@tanstack/eslint-plugin-query": "^5.91.2",
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
