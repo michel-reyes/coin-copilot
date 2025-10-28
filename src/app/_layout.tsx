@@ -1,4 +1,6 @@
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
+import '../global.css';
 
 import { SessionProvider, useSession } from '@/app/context/authContext';
 import { NotificationProvider } from '@/app/context/notificationContext';
@@ -22,14 +24,16 @@ export default function RootLayout() {
 function RootNavigator() {
   const { session } = useSession();
   return (
-    <Stack>
-      <Stack.Protected guard={!!session}>
-        <Stack.Screen name='(private)' />
-      </Stack.Protected>
+    <ThemeProvider value={DarkTheme}>
+      <Stack>
+        <Stack.Protected guard={!!session}>
+          <Stack.Screen name='(private)' />
+        </Stack.Protected>
 
-      <Stack.Protected guard={!session}>
-        <Stack.Screen name='sign-in' />
-      </Stack.Protected>
-    </Stack>
+        <Stack.Protected guard={!session}>
+          <Stack.Screen name='sign-in' />
+        </Stack.Protected>
+      </Stack>
+    </ThemeProvider>
   );
 }
