@@ -1,5 +1,13 @@
 # Welcome to your Expo app 👋
 
+## IMPROTANT
+
+A placeholder (template) branch has been create to start using notifications and supabase, to clone ue this code:
+
+```
+git clone -b template https://github.com/michel-reyes/coin-copilot.git
+```
+
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
 ## Get started
