@@ -1,0 +1,60 @@
+import { createContext, use, useEffect, type PropsWithChildren } from 'react';
+
+import { useNotifications } from '@/app/hooks/useNotifications';
+import { setupNotificationHandler } from '@/app/lib/notifications';
+
+const NotificationContext = createContext({
+  expoPushToken: '',
+  notification: undefined as any,
+  isLoading: false,
+  error: null as string | null,
+});
+
+/**
+ * Hook to access notification state and functions
+ */
+export function useNotificationContext() {
+  const value = use(NotificationContext);
+  if (!value) {
+    throw new Error(
+      'useNotificationContext must be wrapped in a <NotificationProvider />'
+    );
+  }
+  return value;
+}
+
+/**
+ * Provider component that manages push notification state
+ */
+export function NotificationProvider({ children }: PropsWithChildren) {
+  const notificationState = useNotifications();
+
+  useEffect(() => {
+    // Set up the notification handler when the provider mounts
+    setupNotificationHandler();
+  }, []);
+
+  // Log the push token when it's available (useful for testing)
+  useEffect(() => {
+    if (notificationState.expoPushToken) {
+      console.log('📱 Expo Push Token:', notificationState.expoPushToken);
+    }
+  }, [notificationState.expoPushToken]);
+
+  // Log any errors
+  useEffect(() => {
+    if (notificationState.error) {
+      console.error('❌ Notification Error:', notificationState.error);
+    }
+  }, [notificationState.error]);
+
+  return (
+    <NotificationContext.Provider
+      value={{
+        ...notificationState,
+      }}
+    >
+      {children}
+    </NotificationContext.Provider>
+  );
+}
