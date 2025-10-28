@@ -5,7 +5,7 @@ import {
   plaidQuery,
   recurringItemsQuery,
   transactionsQuery,
-} from '@//api/constants/queryOptions';
+} from '@/api/constants/queryOptions';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { combineAccounts } from '../utils';
 

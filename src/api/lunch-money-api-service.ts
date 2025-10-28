@@ -1,5 +1,5 @@
-import { lunchMoneyClient } from '@//api/api-client';
-import { LUNCH_MONEY_ENDPOINTS } from '@//api/constants/apiSettings';
+import { lunchMoneyClient } from '@/api/api-client';
+import { LUNCH_MONEY_ENDPOINTS } from '@/api/constants/apiSettings';
 
 // ----------------------------------------------
 

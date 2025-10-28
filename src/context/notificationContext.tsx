@@ -1,7 +1,7 @@
 import { createContext, use, useEffect, type PropsWithChildren } from 'react';
 
-import { useNotifications } from '@//hooks/useNotifications';
-import { setupNotificationHandler } from '@//lib/notifications';
+import { useNotifications } from '@/hooks/useNotifications';
+import { setupNotificationHandler } from '@/lib/notifications';
 
 const NotificationContext = createContext({
   expoPushToken: '',

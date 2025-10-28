@@ -1,4 +1,4 @@
-import { useSession } from '@//context/authContext';
+import { useSession } from '@/context/authContext';
 import { useFonts } from 'expo-font';
 import { SplashScreen } from 'expo-router';
 

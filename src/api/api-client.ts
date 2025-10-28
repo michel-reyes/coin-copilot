@@ -3,7 +3,7 @@ import {
   LM_API_KEY,
   LM_BASE_URL,
   MOCK_BASE_URL,
-} from '@//api/constants/apiSettings';
+} from '@/api/constants/apiSettings';
 import axios from 'axios';
 
 // --------------------------------------------

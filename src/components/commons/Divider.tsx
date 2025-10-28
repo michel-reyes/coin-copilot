@@ -1,5 +1,5 @@
-import { View } from '@//components/commons/View';
-import colors from '@//themes/colors';
+import { View } from '@/components/commons/View';
+import colors from '@/themes/colors';
 import React from 'react';
 import { type ViewProps as RNViewProps, StyleSheet } from 'react-native';
 
