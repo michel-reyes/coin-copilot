@@ -1,5 +1,5 @@
+import { clsx } from 'clsx';
 import { Text as RNText, type TextProps } from 'react-native';
-import clsx from 'clsx';
 
 export type ThemedTextProps = TextProps & {
   variant?:
