@@ -1,7 +1,8 @@
+import { Text } from '@/app/components/commons/Text';
 import { useSession } from '@/app/context/authContext';
 import { useNotificationContext } from '@/app/context/notificationContext';
 import { Link } from 'expo-router';
-import { Button, Text, View } from 'react-native';
+import { Button, View } from 'react-native';
 
 export default function Index() {
   const { expoPushToken, notification } = useNotificationContext();
@@ -31,7 +32,9 @@ export default function Index() {
     <View
       style={{ flex: 1, alignItems: 'center', justifyContent: 'space-around' }}
     >
-      <Text>Your Expo push token the mi app: {expoPushToken}</Text>
+      <Text className='font-bold text-amber-600'>
+        Your Expo push token the mi app: {expoPushToken}
+      </Text>
       <View style={{ alignItems: 'center', justifyContent: 'center' }}>
         <Text>
           Title: {notification && notification.request.content.title}{' '}
