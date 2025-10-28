@@ -1,4 +1,4 @@
-import type { TransactionAnomaly } from '@/src/api/prisma/generated/client/edge';
+import type { TransactionAnomaly } from '@//api/prisma/generated/client/edge';
 import {
   DEV_MODE,
   MOCK_BASE_URL,

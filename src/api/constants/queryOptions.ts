@@ -1,4 +1,4 @@
-import { LUNCH_MONEY_KEYS, PRISMA_KEYS } from '@/src/api/constants/apiSettings';
+import { LUNCH_MONEY_KEYS, PRISMA_KEYS } from '@//api/constants/apiSettings';
 import {
   fetchAssets,
   fetchBudgets,
@@ -6,15 +6,15 @@ import {
   fetchPlaid,
   fetchRecurringItems,
   fetchTransactions,
-} from '@/src/api/lunch-money-api-service';
+} from '@//api/lunch-money-api-service';
 import {
   createMessageAlert,
   fetchAccountSettings,
   fetchAppSettings,
   fetchMessageAlerts,
   fetchTransactionsAnomaly,
-} from '@/src/api/prisma-api-service';
-import { flattenAndGroupRecurring, flattenCategories } from '@/src/api/utils';
+} from '@//api/prisma-api-service';
+import { flattenAndGroupRecurring, flattenCategories } from '@//api/utils';
 import { queryOptions } from '@tanstack/react-query';
 
 // ----------------------------------------------

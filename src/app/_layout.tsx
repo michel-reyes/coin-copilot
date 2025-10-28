@@ -2,10 +2,10 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import '../global.css';
 
-import queryClient from '@/src/api/query-client';
-import { SessionProvider, useSession } from '@/src/context/authContext';
-import { NotificationProvider } from '@/src/context/notificationContext';
-import SplashScreenController from '@/src/splash';
+import queryClient from '@//api/query-client';
+import { SessionProvider, useSession } from '@//context/authContext';
+import { NotificationProvider } from '@//context/notificationContext';
+import SplashScreenController from '@//splash';
 import { QueryClientProvider } from '@tanstack/react-query';
 
 export default function RootLayout() {

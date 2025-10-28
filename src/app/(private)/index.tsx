@@ -1,5 +1,5 @@
-import { useGetAccounts } from '@/src/api/hooks/use-lunch-money-queries';
-import { ScreenScrollView, Text, View } from '@/src/components/commons';
+import { useGetAccounts } from '@/api/hooks/use-lunch-money-queries';
+import { ScreenScrollView, Text, View } from '@/components/commons';
 
 export default function Index() {
   const { data, isError } = useGetAccounts();

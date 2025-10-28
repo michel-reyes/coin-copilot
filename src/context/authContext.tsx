@@ -7,10 +7,10 @@ import {
   type PropsWithChildren,
 } from 'react';
 
-import { getLunchMoneyApiKey, saveLunchMoneyApiKey } from '@/src/lib/database';
-import { validateLunchMoneyApiKey } from '@/src/lib/lunchMoneyApi';
-import { supabase } from '@/src/lib/supabase';
-import { generateHiddenEmail } from '@/src/lib/utils';
+import { getLunchMoneyApiKey, saveLunchMoneyApiKey } from '@//lib/database';
+import { validateLunchMoneyApiKey } from '@//lib/lunchMoneyApi';
+import { supabase } from '@//lib/supabase';
+import { generateHiddenEmail } from '@//lib/utils';
 
 const AuthContext = createContext<{
   signIn: (apiKey: string) => Promise<void>;
