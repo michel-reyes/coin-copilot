@@ -3,10 +3,12 @@ import useAccounts from '@/features/accounts/hooks/useAccounts';
 import { useGlobalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable } from 'react-native';
+import AccountBalanceLimit from './AccountBalanceLimit';
 import AccountDueDay from './AccountDueDay';
 
 export default function AccountSettings() {
     const [dueDay, setDueDay] = useState<number | undefined>(undefined);
+    const [limit, setLimit] = useState<number | undefined>(undefined);
     const { getAccountById } = useAccounts();
 
     const { id } = useGlobalSearchParams<{ id: string }>();
@@ -35,11 +37,11 @@ export default function AccountSettings() {
                     </Text>
                 </Pressable>
             </View>
-            {/* <AccountBalanceLimit
+            <AccountBalanceLimit
                 account={account}
                 apiLimit={account.limit}
                 onLimitChange={setLimit}
-            /> */}
+            />
             <AccountDueDay account={account} onDueDayChange={setDueDay} />
         </View>
     );
