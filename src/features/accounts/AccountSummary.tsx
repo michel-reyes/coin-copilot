@@ -3,25 +3,25 @@ import AccountSummaryList from '@/features/accounts/components/summary/AccountSu
 import useAccounts from '@/features/accounts/hooks/useAccounts';
 
 export default function AccountSummary() {
-  const { userAccounts, isAccountLoading, isAccountError, getNetWoth } =
-    useAccounts();
+    const { userAccounts, isAccountLoading, isAccountError, getNetWoth } =
+        useAccounts();
 
-  // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
-  // handle states
-  if (isAccountLoading) return <Text>Loading...</Text>;
-  if (isAccountError) return <Text>Error loading accounts</Text>;
-  if (userAccounts.length === 0) {
-    return <Text>No accounts found</Text>;
-  }
+    // handle states
+    if (isAccountLoading) return <Text>Loading...</Text>;
+    if (isAccountError) return <Text>Error loading accounts</Text>;
+    if (userAccounts.length === 0) {
+        return <Text>No accounts found</Text>;
+    }
 
-  // -------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
-  const netWorth = getNetWoth(userAccounts);
+    const netWorth = getNetWoth(userAccounts);
 
-  return (
-    <View>
-      <AccountSummaryList accounts={userAccounts} networth={netWorth} />
-    </View>
-  );
+    return (
+        <View>
+            <AccountSummaryList accounts={userAccounts} networth={netWorth} />
+        </View>
+    );
 }
