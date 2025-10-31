@@ -3,6 +3,7 @@ import { NormalizedAccount } from '@/api/types/queryTypes';
 import { ListItem, Text, View } from '@/components/commons';
 import { IconSymbol } from '@/components/os/IconSymbol';
 import { BankLogo } from '@/features/accounts/components/commons/BankLogo';
+
 import {
     calculateUsagePercentage,
     checkAccountDueDay,
@@ -13,58 +14,48 @@ import colors from '@/themes/colors';
 import { formatCurrency } from '@/utils/number-formatter';
 
 interface HeadsUpAlertMessageProps {
+    dueDay?: number;
     accountInactiveMessage?: string | null;
     dueDayAtMessage?: string;
     dueWarningColor?: '' | 'label' | 'tertiaryLabel' | 'error' | 'warning';
 }
 
 const HeadsUpAlertMessage = ({
+    dueDay,
     accountInactiveMessage,
     dueDayAtMessage,
     dueWarningColor,
 }: HeadsUpAlertMessageProps) => {
     if (accountInactiveMessage) {
         return (
-            <Text
-                variant='caption1'
-                color='warning'
-                className='font-bold uppercase'
-                style={{
-                    boxShadow: `rgba(254,150,1,0.55) -50px 25px 90px`,
-                }}
-            >
-                {accountInactiveMessage}
-            </Text>
+            <View className='flex-1 mt-3'>
+                <Text
+                    variant='caption1'
+                    className='font-bold uppercase text-system-yellow'
+                >
+                    {accountInactiveMessage}
+                </Text>
+            </View>
         );
     }
     if (dueDayAtMessage) {
-        let dueMessageShadowColor = null;
-        if (dueWarningColor === 'error') {
-            dueMessageShadowColor = 'rgba(254,58,48,0.55)';
-        } else if (dueWarningColor === 'warning') {
-            dueMessageShadowColor = 'rgba(254,150,1,0.55)';
-        }
-
         return (
-            <Text
-                variant='caption1'
-                color='secondaryLabel'
-                className='font-bold uppercase'
-                style={{
-                    boxShadow: dueMessageShadowColor
-                        ? `${dueMessageShadowColor} 0px 30px 90px`
-                        : '',
-                }}
-            >
-                Due{` `}
+            <View className='flex-1 mt-3 flex-row items-center justify-between'>
                 <Text
                     variant='caption1'
-                    color={dueWarningColor}
+                    color='tertiaryLabel'
                     className='font-bold uppercase'
                 >
-                    {dueDayAtMessage}
+                    Due{` `}
+                    <Text
+                        variant='caption1'
+                        color={dueWarningColor}
+                        className='font-bold uppercase'
+                    >
+                        {dueDayAtMessage}
+                    </Text>
                 </Text>
-            </Text>
+            </View>
         );
     }
 
@@ -121,66 +112,69 @@ export default function AccountSummaryListItem({
     );
 
     return (
-        <ListItem
-            href={
-                {
-                    pathname: '/accounts/[id]',
-                    params: { id: account.id.toString() },
-                } as any
-            }
-            showLinkIcon={false}
-            leadingIcon={<BankLogo title={name} />}
-            dividerStartSpace={52}
-            density='condensed'
-            title={
-                <HeadsUpAlertMessage
-                    accountInactiveMessage={accountInactiveMessage}
-                    dueDayAtMessage={dueDayAtMessage}
-                    dueWarningColor={dueWarningColor}
-                />
-            }
-            description={
-                <Text variant='headline' className='flex-1'>
-                    {name}
-                </Text>
-            }
-            descriptionHint={<Text variant='headline'>{balance}</Text>}
-            metadata={
-                <View className='flex-row items-center gap-3 flex-1'>
-                    <View className='flex-row items-center gap-1'>
-                        <IconSymbol
-                            name='ellipsis'
-                            color={colors['system-icon']}
-                            size={24}
-                        />
-                        <Text variant='headline' color='tertiaryLabel'>
-                            {mask}
-                        </Text>
-                    </View>
-
-                    <View className='flex-row items-center gap-1'>
-                        <IconSymbol
-                            name='triangle.tophalf.filled'
-                            color={colors['system-white']}
-                            size={18}
-                        />
-                        <Text variant='headline' color='tertiaryLabel'>
-                            {limitLabel}
-                        </Text>
-                    </View>
-                </View>
-            }
-            metadataHint={
-                <Text
-                    color='tertiaryLabel'
-                    className='font-bold mr-0 pr-0 ml-auto'
-                >
-                    Usage {` `}
-                    <Text variant='headline' color={usageColor}>
-                        {usagePercentageText}
+        <>
+            <ListItem
+                href={
+                    {
+                        pathname: '/accounts/[id]',
+                        params: { id: account.id.toString() },
+                    } as any
+                }
+                showLinkIcon={false}
+                leadingIcon={<BankLogo title={name} />}
+                dividerStartSpace={52}
+                density='condensed'
+                title={
+                    <Text variant='headline' className='flex-1'>
+                        {name}
                     </Text>
-                </Text>
-            }
-        />
+                }
+                hint={<Text variant='headline'>{balance}</Text>}
+                description={
+                    <View className='flex-row items-center gap-3 flex-1'>
+                        <View className='flex-row items-center gap-1'>
+                            <IconSymbol
+                                name='ellipsis'
+                                color={colors['system-icon']}
+                                size={24}
+                            />
+                            <Text variant='headline' color='tertiaryLabel'>
+                                {mask}
+                            </Text>
+                        </View>
+
+                        <View className='flex-row items-center gap-1'>
+                            <IconSymbol
+                                name='triangle.tophalf.filled'
+                                color={colors['system-white']}
+                                size={18}
+                            />
+                            <Text variant='headline' color='tertiaryLabel'>
+                                {limitLabel}
+                            </Text>
+                        </View>
+                    </View>
+                }
+                descriptionHint={
+                    <Text
+                        color='tertiaryLabel'
+                        className='font-bold mr-0 pr-0 ml-auto'
+                    >
+                        Usage {` `}
+                        <Text variant='headline' color={usageColor}>
+                            {usagePercentageText}
+                        </Text>
+                    </Text>
+                }
+                metadata={
+                    <HeadsUpAlertMessage
+                        dueDay={dueDay}
+                        accountInactiveMessage={accountInactiveMessage}
+                        dueDayAtMessage={dueDayAtMessage}
+                        dueWarningColor={dueWarningColor}
+                    />
+                }
+            />
+        </>
     );
 }

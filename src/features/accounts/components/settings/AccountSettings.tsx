@@ -12,6 +12,7 @@ export default function AccountSettings() {
     const [balanceLimit, setBalanceLimit] = useState<number | undefined>(
         undefined
     );
+
     const upsertMutation = useUpsertAccountSettings();
     const { getAccountById } = useAccounts();
     const rootLayout = useNavigation('/(private)/accounts');
@@ -25,24 +26,11 @@ export default function AccountSettings() {
 
     // Save account settings and dismiss modal
     const handleSaveAccountSettings = () => {
-        // Save due day
-        // updateAccountSetting({
-        //     accountId: String(account.id),
-        //     updateData: {
-        //         dueDay: dueDay,
-        //         accountName: account.display_name || account.name,
-        //     },
-        // });
-
-        // Save limit
-        // updateAccountSetting({
-        //     accountId: String(account.id),
-        //     updateData: { balanceLimit: balanceLimit },
-        // });
         upsertMutation.mutate({
             accountId: String(account.id),
             institutionName: account.institution_name,
             balanceLimit: balanceLimit,
+            dueDay: dueDay,
         });
 
         // dismiss account settings modal

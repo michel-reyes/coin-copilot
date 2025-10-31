@@ -28,8 +28,6 @@ export default function AccountDueDay({
         isError,
     } = useGetAccountSettings(accountId, account.institution_name);
 
-    // const upsertMutation = useUpsertAccountSettings();
-
     // Local state for the selected day
     const [selectedDay, setSelectedDay] = useState<number | undefined>(
         undefined
@@ -49,18 +47,6 @@ export default function AccountDueDay({
     }, [accountId, accountSetting, isLoading, isError]);
 
     // Handle day selection
-    // const handleDayPress = (day: number) => {
-    //     setSelectedDay(day);
-
-    //     // Save to Supabase via mutation
-    //     upsertMutation.mutate({
-    //         accountId: String(account.id),
-    //         institutionName: account.institution_name,
-    //         dueDay: day,
-    //     });
-    // };
-
-    // Handle day selection
     const handleDayPress = (day: number) => {
         setSelectedDay(day);
 
@@ -69,6 +55,28 @@ export default function AccountDueDay({
             onDueDayChange(day);
         }
     };
+
+    // -------------------------------------------------------------------
+
+    if (isLoading) {
+        return (
+            <View className='p-4 border mb-4'>
+                <Text className='mb-5'>Due Day</Text>
+                <Text>Loading...</Text>
+            </View>
+        );
+    }
+
+    if (isError) {
+        return (
+            <View className='p-4 border mb-4'>
+                <Text className='mb-5'>Due Day</Text>
+                <Text>Error loading account settings</Text>
+            </View>
+        );
+    }
+
+    // -------------------------------------------------------------------
 
     // Render a day item
     const renderDayItem = ({ item }: { item: number | null }) => {

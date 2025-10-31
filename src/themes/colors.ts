@@ -14,4 +14,5 @@ export default module.exports = {
     'system-green': '#13B76B',
     'system-red': '#FE3A30',
     'system-orange': '#FE9601',
+    'system-yellow': '#FBAF23',
 };
