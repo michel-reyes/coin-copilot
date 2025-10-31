@@ -37,7 +37,7 @@ export const PRISMA_ENDPOINTS = {
 
 // --------------------------------------------
 
-export const PRISMA_KEYS = {
+export const SUPABASE_KEYS = {
     accountSettings: 'accountSettings',
     transactionsAnomaly: 'transactionsAnomaly',
     appSettings: 'appSettings',

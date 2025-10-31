@@ -1,4 +1,4 @@
-import { useGetAccountSettings } from '@/api/hooks/use-prisma-queries';
+import { useGetAccountSettings } from '@/api/hooks/use-supabase-queries';
 import { NormalizedAccount } from '@/api/types/queryTypes';
 import { Text, View } from '@/components/commons';
 import CircleSelectedSVG from '@/features/accounts/components/commons/CircleSelectSVG';
@@ -26,7 +26,9 @@ export default function AccountDueDay({
         data: accountSetting,
         isLoading,
         isError,
-    } = useGetAccountSettings(accountId);
+    } = useGetAccountSettings(accountId, account.institution_name);
+
+    // const upsertMutation = useUpsertAccountSettings();
 
     // Local state for the selected day
     const [selectedDay, setSelectedDay] = useState<number | undefined>(
@@ -38,24 +40,25 @@ export default function AccountDueDay({
         // wait until all required data is loaded
         if (isLoading || isError || !accountSetting) return;
 
-        // Handle both array and single object responses
-        let dueDay: number | undefined;
+        // accountSetting is now a single object from Supabase
+        const dueDay = accountSetting.due_day;
 
-        if (Array.isArray(accountSetting)) {
-            // If it's an array, find the matching account
-            const matchingAccount = accountSetting.find(
-                (account: any) => account.accountId === accountId
-            );
-            dueDay = matchingAccount?.dueDay;
-        } else {
-            // If it's a single object
-            dueDay = accountSetting.dueDay;
-        }
-
-        if (dueDay !== undefined) {
+        if (dueDay !== undefined && dueDay !== null) {
             setSelectedDay(dueDay);
         }
     }, [accountId, accountSetting, isLoading, isError]);
+
+    // Handle day selection
+    // const handleDayPress = (day: number) => {
+    //     setSelectedDay(day);
+
+    //     // Save to Supabase via mutation
+    //     upsertMutation.mutate({
+    //         accountId: String(account.id),
+    //         institutionName: account.institution_name,
+    //         dueDay: day,
+    //     });
+    // };
 
     // Handle day selection
     const handleDayPress = (day: number) => {
