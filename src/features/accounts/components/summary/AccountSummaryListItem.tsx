@@ -1,4 +1,4 @@
-import { useGetAccountSettings } from '@/api/hooks/use-prisma-queries';
+import { useGetAccountSettings } from '@/api/hooks/use-supabase-queries';
 import { NormalizedAccount } from '@/api/types/queryTypes';
 import { ListItem, Text, View } from '@/components/commons';
 import { IconSymbol } from '@/components/os/IconSymbol';
@@ -81,7 +81,7 @@ export default function AccountSummaryListItem({
         data: accountSetting,
         isLoading,
         isError,
-    } = useGetAccountSettings(account.id.toString());
+    } = useGetAccountSettings(account.id.toString(), account.institution_name);
 
     if (account.isClosed) {
         return <Text>Account is closed</Text>;
@@ -96,12 +96,12 @@ export default function AccountSummaryListItem({
     }
 
     // format fields
-    const settingsLimit = accountSetting?.balanceLimit || null;
+    const settingsLimit = accountSetting?.balance_limit || null;
     const mask = account.mask ? `${account.mask}` : '####';
     const balance = formatCurrency(account.balance);
     const name = account.display_name;
 
-    const dueDay = accountSetting?.dueDay || 0;
+    const dueDay = accountSetting?.due_day || 0;
     const accountInactiveMessage = checkInactiveAccount(
         dueDay,
         account.status,

@@ -245,10 +245,11 @@ export interface FormatedRecurringItem {
 
 export interface AccountSettings {
     id: string;
-    accountId: string;
-    accountName: string;
-    balanceLimit: number | null;
-    dueDay: number | null;
-    createdAt: string;
-    updatedAt: string;
+    user_id: string;
+    account_id: string;
+    institution_name: string;
+    balance_limit: number | null;
+    due_day: number | null;
+    created_at: string;
+    updated_at: string;
 }

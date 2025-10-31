@@ -1,4 +1,4 @@
-import { useGetAccountSettings } from '@/api/hooks/use-prisma-queries';
+import { useGetAccountSettings } from '@/api/hooks/use-supabase-queries';
 import { NormalizedAccount } from '@/api/types/queryTypes';
 import { Text, View } from '@/components/commons';
 import { IconSymbol } from '@/components/os/IconSymbol';
@@ -9,75 +9,48 @@ import { displayAccountLimit } from '../../utils/account-helper';
 
 interface AccountBalanceLimitProps {
     account: NormalizedAccount;
-    /** Limit provided by the API (Plaid), null if not available (Assets) */
-    apiLimit: number | null;
     onLimitChange?: (limit: number) => void;
 }
 
 /**
  * Component to display and optionally set the balance limit for an account.
- * - If apiLimit is provided, it's displayed read-only.
- * - If apiLimit is null, the user can set a custom limit stored in Zustand.
+ * - If account.limit is provided, it's displayed read-only.
+ * - If account.limit is null, the user can set a custom limit stored in Zustand.
  */
 export default function AccountBalanceLimit({
     account,
-    apiLimit,
     onLimitChange,
 }: AccountBalanceLimitProps) {
     const {
         data: accountSettings,
         isLoading,
         isError,
-    } = useGetAccountSettings(String(account.id));
+    } = useGetAccountSettings(String(account.id), account.institution_name);
+
+    // const upsertMutation = useUpsertAccountSettings();
 
     // Local state for the input when editable - initialize with empty string
     const [inputValue, setInputValue] = useState<string>('');
 
     const { limitLabel } = displayAccountLimit(
         account.limit,
-        accountSettings?.balanceLimit || 0,
+        accountSettings?.balance_limit || 0,
         account.isIncome
     );
     // Determine if the component is in an editable state
-    const isEditable = apiLimit === null && !account.isIncome;
+    const isEditable = account.limit === null && !account.isIncome;
     const hasOriginalLimit = account?.limit !== null;
 
     useEffect(() => {
         if (isLoading || isError) {
-            // Don't attempt to set inputValue until loading/error state is resolved
-            // or if accountSettings are not yet available.
             return;
         }
 
-        if (!isEditable) {
-            // Component is not for user editing (e.g., apiLimit is set, or it's an income account).
-            // The editable TextInput isn't rendered or is non-interactive.
-            // Set inputValue for consistency if apiLimit is available, though not critical for user input.
-            if (apiLimit !== null) {
-                setInputValue(String(apiLimit));
-            } else if (account.isIncome) {
-                setInputValue(''); // Or a placeholder like "N/A" for income accounts
-            }
-            return;
-        }
-
-        // At this point, isEditable is true (apiLimit is null AND !account.isIncome).
-        // The user-editable TextInput section is rendered.
-        if (hasOriginalLimit) {
-            // TextInput is rendered but set to `editable={false}` by its prop.
-            // It displays `account.limit` (institution-set limit).
-            setInputValue(String(account.limit));
-        } else {
-            // TextInput is rendered and `editable={true}` by its prop.
-            // User can set a custom limit. Initialize from `accountSettings.balanceLimit`.
-            const currentCustomLimit = accountSettings?.balanceLimit;
-            // If currentCustomLimit is 0, String(0) is "0". If undefined, then ''.
-            setInputValue(
-                currentCustomLimit !== undefined
-                    ? String(currentCustomLimit)
-                    : ''
-            );
-        }
+        const currentCustomLimit = accountSettings?.balance_limit;
+        // If currentCustomLimit is 0, String(0) is "0". If undefined, then ''.
+        setInputValue(
+            Boolean(currentCustomLimit) ? String(currentCustomLimit) : ''
+        );
     }, [
         account.id,
         account.limit,
@@ -85,7 +58,7 @@ export default function AccountBalanceLimit({
         accountSettings, // This includes accountSettings itself, not just balanceLimit
         isEditable,
         hasOriginalLimit,
-        apiLimit,
+        account.limit,
         isLoading,
         isError,
     ]);
@@ -103,7 +76,7 @@ export default function AccountBalanceLimit({
         // Conditions for calling onLimitChange:
         // 1. `onLimitChange` callback must exist.
         // 2. The component must be in a state where user can set a limit:
-        //    - `isEditable` must be true (apiLimit is null AND !account.isIncome)
+        //    - `isEditable` must be true (account.limit is null AND !account.isIncome)
         //    - `hasOriginalLimit` must be false (account.limit is null, so it's not an institution-set limit)
         //    The TextInput's own `editable` prop (`!hasOriginalLimit`) ensures user interaction only happens in this case.
         if (!onLimitChange || !isEditable || hasOriginalLimit) {
@@ -129,7 +102,8 @@ export default function AccountBalanceLimit({
         }
     };
 
-    // If still loading or error, show a loading state
+    // -------------------------------------------------------------------
+
     if (isLoading) {
         return (
             <View className='p-4 border mb-4'>
@@ -139,15 +113,7 @@ export default function AccountBalanceLimit({
         );
     }
 
-    if (isError || !accountSettings) {
-        if (account.isIncome) {
-            return (
-                <View className='p-4 border mb-4'>
-                    <Text className='mb-5'>Balance Limit</Text>
-                    <Text>Income accounts do not have a balance limit</Text>
-                </View>
-            );
-        }
+    if (isError) {
         return (
             <View className='p-4 border mb-4'>
                 <Text className='mb-5'>Balance Limit</Text>
@@ -155,6 +121,8 @@ export default function AccountBalanceLimit({
             </View>
         );
     }
+
+    // -------------------------------------------------------------------
 
     return (
         <View className='p-4'>
