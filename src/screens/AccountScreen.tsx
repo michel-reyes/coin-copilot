@@ -1,5 +1,6 @@
 import { Text, View } from '@/components/commons';
 import StackBack from '@/components/os/StackBack';
+import Account from '@/features/accounts/Account';
 // import Account from '@/features/accounts/components/details/account';
 import useAccounts from '@/features/accounts/hooks/useAccounts';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -43,7 +44,7 @@ export default function AccountScreen() {
                     headerLeft: () => <StackBack />,
                 }}
             />
-            {/* <Account account={account} /> */}
+            <Account account={account} />
         </View>
     );
 }

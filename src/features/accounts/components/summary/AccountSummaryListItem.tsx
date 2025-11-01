@@ -2,77 +2,37 @@ import { useGetAccountSettings } from '@/api/hooks/use-supabase-queries';
 import { NormalizedAccount } from '@/api/types/queryTypes';
 import { ListItem, Text, View } from '@/components/commons';
 import { IconSymbol } from '@/components/os/IconSymbol';
+import AccountMask from '@/features/accounts/components/commons/AccountMask';
 import { BankLogo } from '@/features/accounts/components/commons/BankLogo';
-
-import {
-    calculateUsagePercentage,
-    checkAccountDueDay,
-    checkInactiveAccount,
-    displayAccountLimit,
-} from '@/features/accounts/utils/account-helper';
+import HeadsUpAlertMessage from '@/features/accounts/components/commons/HeadsUpAlertMessage';
+import useAccountDetails from '@/features/accounts/hooks/useAccountDetails';
 import colors from '@/themes/colors';
-import { formatCurrency } from '@/utils/number-formatter';
 
-interface HeadsUpAlertMessageProps {
-    dueDay?: number;
-    accountInactiveMessage?: string | null;
-    dueDayAtMessage?: string;
-    dueWarningColor?: '' | 'label' | 'tertiaryLabel' | 'error' | 'warning';
-}
-
-const HeadsUpAlertMessage = ({
-    dueDay,
-    accountInactiveMessage,
-    dueDayAtMessage,
-    dueWarningColor,
-}: HeadsUpAlertMessageProps) => {
-    if (accountInactiveMessage) {
-        return (
-            <View className='flex-1 mt-3'>
-                <Text
-                    variant='caption1'
-                    className='font-bold uppercase text-system-yellow'
-                >
-                    {accountInactiveMessage}
-                </Text>
-            </View>
-        );
-    }
-    if (dueDayAtMessage) {
-        return (
-            <View className='flex-1 mt-3 flex-row items-center justify-between'>
-                <Text
-                    variant='caption1'
-                    color='tertiaryLabel'
-                    className='font-bold uppercase'
-                >
-                    Due{` `}
-                    <Text
-                        variant='caption1'
-                        color={dueWarningColor}
-                        className='font-bold uppercase'
-                    >
-                        {dueDayAtMessage}
-                    </Text>
-                </Text>
-            </View>
-        );
-    }
-
-    return null;
-};
+// ------------------------------------------------------------
 
 export default function AccountSummaryListItem({
     account,
 }: {
     account: NormalizedAccount;
 }) {
-    // Get the due day from the store if it exists
     const {
         data: accountSetting,
         isLoading,
         isError,
     } = useGetAccountSettings(account.id.toString(), account.institution_name);
+
+    const {
+        mask,
+        balance,
+        name,
+        dueDay,
+        accountInactiveMessage,
+        dueDayAtMessage,
+        dueWarningColor,
+        limitLabel,
+        usagePercentageText,
+        usageColor,
+    } = useAccountDetails(account, accountSetting);
 
     if (account.isClosed) {
         return <Text>Account is closed</Text>;
@@ -85,31 +45,6 @@ export default function AccountSummaryListItem({
     if (isError) {
         return <Text>Error loading account settings</Text>;
     }
-
-    // format fields
-    const settingsLimit = accountSetting?.balance_limit || null;
-    const mask = account.mask ? `${account.mask}` : '####';
-    const balance = formatCurrency(account.balance);
-    const name = account.display_name;
-
-    const dueDay = accountSetting?.due_day || 0;
-    const accountInactiveMessage = checkInactiveAccount(
-        dueDay,
-        account.status,
-        account.lastUpdate
-    );
-    const { dueDayAtMessage, dueWarningColor } = checkAccountDueDay(dueDay);
-    const { limitLabel, limitValue } = displayAccountLimit(
-        account.limit,
-        settingsLimit,
-        account.isIncome
-    );
-    const { usagePercentageText, usageColor } = calculateUsagePercentage(
-        limitValue,
-        account.limit,
-        account.isIncome,
-        account.balance
-    );
 
     return (
         <>
@@ -132,16 +67,7 @@ export default function AccountSummaryListItem({
                 hint={<Text variant='headline'>{balance}</Text>}
                 description={
                     <View className='flex-row items-center gap-3 flex-1'>
-                        <View className='flex-row items-center gap-1'>
-                            <IconSymbol
-                                name='ellipsis'
-                                color={colors['system-icon']}
-                                size={24}
-                            />
-                            <Text variant='headline' color='tertiaryLabel'>
-                                {mask}
-                            </Text>
-                        </View>
+                        <AccountMask mask={mask} />
 
                         <View className='flex-row items-center gap-1'>
                             <IconSymbol
@@ -149,6 +75,7 @@ export default function AccountSummaryListItem({
                                 color={colors['system-white']}
                                 size={18}
                             />
+
                             <Text variant='headline' color='tertiaryLabel'>
                                 {limitLabel}
                             </Text>
@@ -167,12 +94,14 @@ export default function AccountSummaryListItem({
                     </Text>
                 }
                 metadata={
-                    <HeadsUpAlertMessage
-                        dueDay={dueDay}
-                        accountInactiveMessage={accountInactiveMessage}
-                        dueDayAtMessage={dueDayAtMessage}
-                        dueWarningColor={dueWarningColor}
-                    />
+                    <View className='mt-3'>
+                        <HeadsUpAlertMessage
+                            dueDay={dueDay}
+                            accountInactiveMessage={accountInactiveMessage}
+                            dueDayAtMessage={dueDayAtMessage}
+                            dueWarningColor={dueWarningColor}
+                        />
+                    </View>
                 }
             />
         </>

@@ -1,7 +1,7 @@
 import { AccountSettings } from '@/api/types/apiTypes';
 import { type ThemedTextProps } from '@/components/commons/Text';
 import { LAST_15_DAYS, TODAY_DAY, getMonthName } from '@/utils/date-utils';
-import { formatShortCurrency } from '@/utils/number-formatter';
+import { formatCurrency, formatShortCurrency } from '@/utils/number-formatter';
 import dayjs from 'dayjs';
 
 const PAYMENT_DUE_SOON_THRESHOLD = 7;
@@ -135,21 +135,26 @@ export function checkAccountDueDay(dueDay = 0) {
 export function displayAccountLimit(
     accountLimit: number | null,
     settingsLimit: number | null,
-    isIncome: boolean
+    isIncome: boolean,
+    isLongFormat: boolean = false
 ) {
     let limitValue: number | null = 0;
     // Handle limit rendering based on different conditions
     let limitLabel: string | number | null = null;
     if (accountLimit === 0) {
-        limitLabel = 'open limit'; // Infinite spending
+        limitLabel = 'Open limit'; // Infinite spending
     } else if (accountLimit !== null) {
-        limitLabel = formatShortCurrency(accountLimit);
+        limitLabel = isLongFormat
+            ? formatCurrency(accountLimit)
+            : formatShortCurrency(accountLimit);
         limitValue = accountLimit;
     } else if (isIncome) {
         limitLabel = 'Debit acct.'; // Not applicable for income accounts
     } else if (settingsLimit !== null) {
         limitLabel = settingsLimit;
-        limitLabel = formatShortCurrency(settingsLimit);
+        limitLabel = isLongFormat
+            ? formatCurrency(settingsLimit)
+            : formatShortCurrency(settingsLimit);
         limitValue = Number(settingsLimit);
     } else {
         limitLabel = 'Not set'; // Limit not set yet for expense accounts
