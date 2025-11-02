@@ -25,7 +25,8 @@ const useAccountDetails = (
         account.status,
         account.lastUpdate
     );
-    const { dueDayAtMessage, dueWarningColor } = checkAccountDueDay(dueDay);
+    const { dueDayAtMessage, dueWarningColor, dueMonthDay } =
+        checkAccountDueDay(dueDay);
     const { limitLabel, limitValue } = displayAccountLimit(
         account.limit,
         settingsLimit,
@@ -46,6 +47,7 @@ const useAccountDetails = (
         dueDay,
         accountInactiveMessage,
         dueDayAtMessage,
+        dueMonthDay,
         dueWarningColor,
         limitLabel,
         limitValue,

@@ -31,6 +31,7 @@ export default function AccountSummaryListItem({
         dueWarningColor,
         limitLabel,
         usagePercentageText,
+        dueMonthDay,
         usageColor,
     } = useAccountDetails(account, accountSetting);
 
@@ -96,10 +97,11 @@ export default function AccountSummaryListItem({
                 metadata={
                     <View className='mt-3'>
                         <HeadsUpAlertMessage
-                            dueDay={dueDay}
                             accountInactiveMessage={accountInactiveMessage}
                             dueDayAtMessage={dueDayAtMessage}
+                            dueMonthDay={dueMonthDay}
                             dueWarningColor={dueWarningColor}
+                            isLoading={isLoading}
                         />
                     </View>
                 }

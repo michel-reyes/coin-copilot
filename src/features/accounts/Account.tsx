@@ -20,6 +20,7 @@ export default function Account({ account }: { account: NormalizedAccount }) {
         dueDay,
         accountInactiveMessage,
         dueDayAtMessage,
+        dueMonthDay,
         dueWarningColor,
         limitLabel,
         limitValue,
@@ -35,17 +36,18 @@ export default function Account({ account }: { account: NormalizedAccount }) {
                     <AccountMask mask={mask} />
                     <View className='ml-auto'>
                         <HeadsUpAlertMessage
-                            dueDay={dueDay}
                             accountInactiveMessage={accountInactiveMessage}
                             dueDayAtMessage={dueDayAtMessage}
+                            dueMonthDay={dueMonthDay}
                             dueWarningColor={dueWarningColor}
+                            isLoading={isLoading}
                         />
                     </View>
                 </View>
 
                 <View
                     variant='card'
-                    className='m-1 bg-system-surface rounded-2xl'
+                    className='m-1 bg-system-surface rounded-2xl py-6'
                 >
                     <View className='flex gap-1'>
                         <Text variant='body' color='secondaryLabel'>

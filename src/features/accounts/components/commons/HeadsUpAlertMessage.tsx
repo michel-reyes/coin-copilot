@@ -1,50 +1,58 @@
 import { Text, View } from '@/components/commons';
 
 interface HeadsUpAlertMessageProps {
-    dueDay?: number;
     accountInactiveMessage?: string | null;
     dueDayAtMessage?: string;
+    dueMonthDay?: string;
     dueWarningColor?: '' | 'label' | 'tertiaryLabel' | 'error' | 'warning';
+    isLoading?: boolean;
 }
 
 const HeadsUpAlertMessage = ({
-    dueDay,
     accountInactiveMessage,
     dueDayAtMessage,
+    dueMonthDay,
     dueWarningColor,
+    isLoading = false,
 }: HeadsUpAlertMessageProps) => {
-    if (accountInactiveMessage) {
-        return (
-            <Text
-                variant='caption1'
-                className='font-bold uppercase text-system-yellow'
-            >
-                {accountInactiveMessage}
-            </Text>
-        );
-    }
-    if (dueDayAtMessage) {
-        return (
-            <View className='flex-1 flex-row items-center justify-between'>
-                <Text
-                    variant='caption1'
-                    color='tertiaryLabel'
-                    className='font-bold uppercase'
-                >
-                    Due{` `}
-                    <Text
-                        variant='caption1'
-                        color={dueWarningColor}
-                        className='font-bold uppercase'
-                    >
-                        {dueDayAtMessage}
-                    </Text>
-                </Text>
-            </View>
-        );
+    if (isLoading) {
+        return <Text>Loading...</Text>;
     }
 
-    return null;
+    return (
+        <View className='flex-1 gap-1'>
+            {accountInactiveMessage && (
+                <Text
+                    variant='caption1'
+                    className='font-bold uppercase text-system-yellow'
+                >
+                    {accountInactiveMessage}
+                </Text>
+            )}
+            {dueDayAtMessage && (
+                <View className='flex-1 flex-row items-center justify-between'>
+                    <Text
+                        variant='footnote'
+                        color='tertiaryLabel'
+                        className='font-bold'
+                    >
+                        Due{` `}
+                        <Text
+                            variant='footnote'
+                            color={dueWarningColor}
+                            className='font-bold'
+                        >
+                            {dueDayAtMessage}
+                        </Text>
+                        {` `} on {` `}
+                        <Text variant='footnote' className='font-bold'>
+                            {dueMonthDay}
+                        </Text>
+                    </Text>
+                </View>
+            )}
+        </View>
+    );
 };
 
 export default HeadsUpAlertMessage;

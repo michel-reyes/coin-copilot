@@ -1,6 +1,6 @@
 import { AccountSettings } from '@/api/types/apiTypes';
 import { type ThemedTextProps } from '@/components/commons/Text';
-import { LAST_15_DAYS, TODAY_DAY, getMonthName } from '@/utils/date-utils';
+import { LAST_15_DAYS, NOW, TODAY_DAY, getMonthName } from '@/utils/date-utils';
 import { formatCurrency, formatShortCurrency } from '@/utils/number-formatter';
 import dayjs from 'dayjs';
 
@@ -74,7 +74,7 @@ export function checkInactiveAccount(dueDay = 0, status = '', lastUpdate = '') {
     if (isInactiveAccount) {
         accountInactiveMessage = 'Account needs attention';
     } else if (outDated) {
-        accountInactiveMessage = 'Account is outdated';
+        accountInactiveMessage = 'Outdated account';
     }
 
     return accountInactiveMessage;
@@ -82,10 +82,18 @@ export function checkInactiveAccount(dueDay = 0, status = '', lastUpdate = '') {
 
 // ------------------------------------------------------------------
 
+/**
+ * Checks the due day of an account and returns a message and warning color based on how soon the due date is.
+ * @param dueDay The due day of the month for the account.
+ * @returns
+ */
 export function checkAccountDueDay(dueDay = 0) {
     // due day logic
     const isToday = (date: any) => date.isSame(dayjs(), 'day');
     const isTomorrow = (date: any) => date.isSame(dayjs().add(1, 'day'), 'day');
+    const dueMonthDay = dueDay
+        ? getMonthName(NOW.format('YYYY-MM-DD'), 'short') + ' ' + String(dueDay)
+        : '';
 
     let dueDayAtMessage = '';
     let dueWarningColor: ThemedTextProps['color'] = '';
@@ -117,9 +125,10 @@ export function checkAccountDueDay(dueDay = 0) {
             dueWarningColor = 'label';
         } else if (daysDifference >= 9 && daysDifference <= 13) {
             // Corresponds to "more than 8 days and less than 14 days"
-            dueDayAtMessage = `${getMonthName(
-                calculatedFullDueDay.format('YYYY-MM-DD')
-            )} ${calculatedFullDueDay.format('DD')}`;
+            // dueDayAtMessage = `${getMonthName(
+            //     calculatedFullDueDay.format('YYYY-MM-DD')
+            // )} ${calculatedFullDueDay.format('DD')}`;
+            dueDayAtMessage = `in ${daysDifference} days`;
             dueWarningColor = 'tertiaryLabel';
         } else {
             // No specific message for other ranges (e.g., > 13 days or past due beyond 'Today')
@@ -127,7 +136,7 @@ export function checkAccountDueDay(dueDay = 0) {
         }
     }
 
-    return { dueDayAtMessage, dueWarningColor };
+    return { dueDayAtMessage, dueWarningColor, dueMonthDay };
 }
 
 // ------------------------------------------------------------------
