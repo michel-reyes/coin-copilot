@@ -466,7 +466,7 @@ export function parseTimeString(timeString: string): {
   minutes: number;
   seconds: number;
 } {
-  const [hours, minutes, seconds = '0'] = timeString.split(':').map(Number);
+  const [hours, minutes, seconds = 0] = timeString.split(':').map(Number);
   return { hours, minutes, seconds };
 }
 
@@ -478,13 +478,19 @@ export function getRecurrenceDescription(event: Event): string {
     case 'one_time':
       return 'One time';
     case 'monthly':
-      const day = new Date(event.due_date).getDate();
+      // Parse date string manually to avoid timezone issues
+      const [, , dayStr] = event.due_date.split('-');
+      const day = parseInt(dayStr, 10);
       const suffix =
         day === 1 ? 'st' : day === 2 ? 'nd' : day === 3 ? 'rd' : 'th';
       return `Monthly on the ${day}${suffix}`;
     case 'weekly':
-      const dayName = new Date(event.due_date).toLocaleDateString('en-US', {
+      // Parse date as UTC to avoid timezone shifts
+      const [year, month, dayOfMonth] = event.due_date.split('-').map(Number);
+      const date = new Date(Date.UTC(year, month - 1, dayOfMonth));
+      const dayName = date.toLocaleDateString('en-US', {
         weekday: 'long',
+        timeZone: 'UTC',
       });
       return `Every ${dayName}`;
     case 'custom':

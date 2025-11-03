@@ -36,11 +36,11 @@ export interface PendingNotification {
 
 /**
  * Parse ISO date string to Date (date only, no time)
- * Avoids timezone issues by parsing YYYY-MM-DD directly
+ * Uses UTC to avoid timezone issues
  */
 export function parseDate(dateString: string): Date {
   const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(year, month - 1, day); // month is 0-indexed
+  return new Date(Date.UTC(year, month - 1, day)); // month is 0-indexed, use UTC
 }
 
 /**
@@ -50,16 +50,20 @@ export function shouldEventOccurOnDate(
   event: Event,
   checkDate: Date
 ): boolean {
-  const dueDate = parseDate(event.due_date); // Fix timezone issue
+  const dueDate = parseDate(event.due_date);
   const checkDateOnly = new Date(
-    checkDate.getFullYear(),
-    checkDate.getMonth(),
-    checkDate.getDate()
+    Date.UTC(
+      checkDate.getUTCFullYear(),
+      checkDate.getUTCMonth(),
+      checkDate.getUTCDate()
+    )
   );
   const dueDateOnly = new Date(
-    dueDate.getFullYear(),
-    dueDate.getMonth(),
-    dueDate.getDate()
+    Date.UTC(
+      dueDate.getUTCFullYear(),
+      dueDate.getUTCMonth(),
+      dueDate.getUTCDate()
+    )
   );
 
   // Event hasn't started yet
@@ -72,12 +76,12 @@ export function shouldEventOccurOnDate(
       return checkDateOnly.getTime() === dueDateOnly.getTime();
 
     case 'monthly':
-      // Occurs on the same day of each month
-      return checkDateOnly.getDate() === dueDateOnly.getDate();
+      // Occurs on the same day of each month (UTC)
+      return checkDateOnly.getUTCDate() === dueDateOnly.getUTCDate();
 
     case 'weekly':
-      // Occurs on the same day of week
-      return checkDateOnly.getDay() === dueDateOnly.getDay();
+      // Occurs on the same day of week (UTC)
+      return checkDateOnly.getUTCDay() === dueDateOnly.getUTCDay();
 
     case 'custom':
       // Occurs every N days
@@ -101,7 +105,7 @@ export function getNextOccurrence(
   event: Event,
   fromDate: Date = new Date()
 ): Date | null {
-  const dueDate = parseDate(event.due_date); // Fix timezone issue
+  const dueDate = parseDate(event.due_date);
   const checkDate = new Date(fromDate);
 
   // For one-time events, always return the due date
@@ -116,7 +120,8 @@ export function getNextOccurrence(
     if (shouldEventOccurOnDate(event, checkDate)) {
       return checkDate;
     }
-    checkDate.setDate(checkDate.getDate() + 1);
+    // Use UTC to avoid DST issues
+    checkDate.setUTCDate(checkDate.getUTCDate() + 1);
   }
 
   return null; // No occurrence found in next year
@@ -200,12 +205,14 @@ export function calculateNotificationDatetime(
   notificationTime: string
 ): Date {
   const notificationDate = new Date(targetDate);
-  notificationDate.setDate(notificationDate.getDate() - daysBefore);
+  // Use UTC to avoid DST issues
+  notificationDate.setUTCDate(notificationDate.getUTCDate() - daysBefore);
 
   // Parse time (HH:MM:SS format)
   const [hours, minutes, seconds = '0'] = notificationTime.split(':').map(Number);
 
-  notificationDate.setHours(hours, minutes, parseInt(seconds.toString()), 0);
+  // Use UTC to avoid DST issues - notification times are interpreted as UTC
+  notificationDate.setUTCHours(hours, minutes, parseInt(seconds.toString()), 0);
 
   return notificationDate;
 }
@@ -243,11 +250,11 @@ export function formatNotificationMessage(
 }
 
 /**
- * Format Date to ISO date string (YYYY-MM-DD)
+ * Format Date to ISO date string (YYYY-MM-DD) in UTC
  */
 export function formatISODate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
