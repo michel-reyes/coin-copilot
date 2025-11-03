@@ -2,8 +2,8 @@ import { useUpsertAccountSettings } from '@/api/hooks/use-supabase-queries';
 import { Text, View } from '@/components/commons';
 import useAccounts from '@/features/accounts/hooks/useAccounts';
 import {
-    updateOrCreateCreditCardEvent,
     deleteEventByAccount,
+    updateOrCreateCreditCardEvent,
 } from '@/lib/eventsApi';
 import { useGlobalSearchParams, useNavigation } from 'expo-router';
 import { useState } from 'react';
@@ -39,6 +39,7 @@ export default function AccountSettings() {
         });
 
         // Handle event creation/update/deletion based on dueDay
+        // for push notifications
         try {
             if (dueDay !== undefined && dueDay !== null) {
                 // Create or update credit card event

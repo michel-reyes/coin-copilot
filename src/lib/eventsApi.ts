@@ -85,29 +85,25 @@ export async function getEventById(
 ): Promise<{ data: EventWithSchedules | null; error: any }> {
   const { data: event, error: eventError } = await supabase
     .from('events')
-    .select('*')
+    .select(`
+      *,
+      event_notification_schedules(*)
+    `)
     .eq('id', eventId)
+    .eq('event_notification_schedules.is_active', true)
+    .order('days_before', { ascending: false, referencedTable: 'event_notification_schedules' })
     .single();
 
   if (eventError || !event) {
     return { data: null, error: eventError };
   }
 
-  const { data: schedules, error: schedulesError } = await supabase
-    .from('event_notification_schedules')
-    .select('*')
-    .eq('event_id', eventId)
-    .eq('is_active', true)
-    .order('days_before', { ascending: false });
-
-  if (schedulesError) {
-    return { data: null, error: schedulesError };
-  }
+  const eventData = event as any;
 
   return {
     data: {
-      ...event,
-      notification_schedules: schedules || [],
+      ...eventData,
+      notification_schedules: eventData.event_notification_schedules || [],
     },
     error: null,
   };
@@ -328,33 +324,27 @@ export async function getEventByAccount(
 ): Promise<{ data: EventWithSchedules | null; error: any }> {
   const { data: events, error: eventError } = await supabase
     .from('events')
-    .select('*')
+    .select(`
+      *,
+      event_notification_schedules(*)
+    `)
     .eq('account_id', accountId)
     .eq('institution_name', institutionName)
     .eq('is_active', true)
+    .eq('event_notification_schedules.is_active', true)
+    .order('days_before', { ascending: false, referencedTable: 'event_notification_schedules' })
     .limit(1);
 
   if (eventError || !events || events.length === 0) {
     return { data: null, error: eventError };
   }
 
-  const event = events[0];
-
-  const { data: schedules, error: schedulesError } = await supabase
-    .from('event_notification_schedules')
-    .select('*')
-    .eq('event_id', event.id)
-    .eq('is_active', true)
-    .order('days_before', { ascending: false });
-
-  if (schedulesError) {
-    return { data: null, error: schedulesError };
-  }
+  const event = events[0] as any;
 
   return {
     data: {
       ...event,
-      notification_schedules: schedules || [],
+      notification_schedules: event.event_notification_schedules || [],
     },
     error: null,
   };
@@ -411,8 +401,14 @@ export async function updateOrCreateCreditCardEvent(
       return { data: null, error: updateError };
     }
 
-    // Return the updated event with schedules
-    return await getEventById(existingEvent.id);
+    // Return updated event with existing schedules (schedules unchanged)
+    return {
+      data: {
+        ...updatedEvent,
+        notification_schedules: existingEvent.notification_schedules,
+      },
+      error: null,
+    };
   } else {
     // Create new event
     return await createEvent(eventData, notificationSchedules);
@@ -426,16 +422,22 @@ export async function deleteEventByAccount(
   accountId: string,
   institutionName: string
 ): Promise<{ data: Event | null; error: any }> {
-  const { data: existingEvent } = await getEventByAccount(
-    accountId,
-    institutionName
-  );
+  // Directly update to soft-delete in single query
+  const { data, error } = await supabase
+    .from('events')
+    .update({ is_active: false })
+    .eq('account_id', accountId)
+    .eq('institution_name', institutionName)
+    .eq('is_active', true) // Only delete if currently active
+    .select()
+    .single();
 
-  if (!existingEvent) {
-    return { data: null, error: null }; // No event to delete
+  // If no rows affected, return null (event doesn't exist or already deleted)
+  if (error?.code === 'PGRST116') {
+    return { data: null, error: null };
   }
 
-  return await deleteEvent(existingEvent.id);
+  return { data, error };
 }
 
 /**
