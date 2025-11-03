@@ -19,6 +19,8 @@ export interface Event {
   recurrence_type: RecurrenceType;
   recurrence_interval?: number; // For custom recurrence
   is_active: boolean;
+  account_id?: string; // Optional link to Lunch Money account
+  institution_name?: string; // Optional institution name for account identification
   created_at: string;
   updated_at: string;
 }
@@ -43,6 +45,8 @@ export interface CreateEventData {
   due_date: string; // YYYY-MM-DD
   recurrence_type: RecurrenceType;
   recurrence_interval?: number;
+  account_id?: string;
+  institution_name?: string;
 }
 
 export interface CreateNotificationScheduleData {
@@ -313,6 +317,125 @@ export async function getNotificationHistory(options?: {
   }
 
   return await query;
+}
+
+/**
+ * Get event by account ID and institution name
+ */
+export async function getEventByAccount(
+  accountId: string,
+  institutionName: string
+): Promise<{ data: EventWithSchedules | null; error: any }> {
+  const { data: events, error: eventError } = await supabase
+    .from('events')
+    .select('*')
+    .eq('account_id', accountId)
+    .eq('institution_name', institutionName)
+    .eq('is_active', true)
+    .limit(1);
+
+  if (eventError || !events || events.length === 0) {
+    return { data: null, error: eventError };
+  }
+
+  const event = events[0];
+
+  const { data: schedules, error: schedulesError } = await supabase
+    .from('event_notification_schedules')
+    .select('*')
+    .eq('event_id', event.id)
+    .eq('is_active', true)
+    .order('days_before', { ascending: false });
+
+  if (schedulesError) {
+    return { data: null, error: schedulesError };
+  }
+
+  return {
+    data: {
+      ...event,
+      notification_schedules: schedules || [],
+    },
+    error: null,
+  };
+}
+
+/**
+ * Update or create a credit card event for an account
+ */
+export async function updateOrCreateCreditCardEvent(
+  accountId: string,
+  institutionName: string,
+  accountDisplayName: string,
+  dueDay: number
+): Promise<{ data: EventWithSchedules | null; error: any }> {
+  // Calculate due date: current year/month with the specified day
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
+  const dueDate = new Date(year, month, dueDay);
+  const dueDateString = formatDateForDB(dueDate);
+
+  const eventData: CreateEventData = {
+    event_type: 'credit_card',
+    title: `${accountDisplayName} Payment Due`,
+    due_date: dueDateString,
+    recurrence_type: 'monthly',
+    account_id: accountId,
+    institution_name: institutionName,
+  };
+
+  const notificationSchedules: CreateNotificationScheduleData[] = [
+    { days_before: 7, notification_time: '09:00:00' },
+    { days_before: 0, notification_time: '08:00:00' },
+  ];
+
+  // Check if event already exists
+  const { data: existingEvent } = await getEventByAccount(
+    accountId,
+    institutionName
+  );
+
+  if (existingEvent) {
+    // Update existing event
+    const { data: updatedEvent, error: updateError } = await updateEvent(
+      existingEvent.id,
+      {
+        title: eventData.title,
+        due_date: eventData.due_date,
+        recurrence_type: eventData.recurrence_type,
+      }
+    );
+
+    if (updateError || !updatedEvent) {
+      return { data: null, error: updateError };
+    }
+
+    // Return the updated event with schedules
+    return await getEventById(existingEvent.id);
+  } else {
+    // Create new event
+    return await createEvent(eventData, notificationSchedules);
+  }
+}
+
+/**
+ * Delete event by account ID and institution name (soft delete)
+ */
+export async function deleteEventByAccount(
+  accountId: string,
+  institutionName: string
+): Promise<{ data: Event | null; error: any }> {
+  const { data: existingEvent } = await getEventByAccount(
+    accountId,
+    institutionName
+  );
+
+  if (!existingEvent) {
+    return { data: null, error: null }; // No event to delete
+  }
+
+  return await deleteEvent(existingEvent.id);
 }
 
 /**
