@@ -219,10 +219,10 @@ Deno.serve(async (req) => {
     // ========================================
     console.log('Step 7: Deleting old notification history (45-day retention)...');
 
-    // Calculate cutoff date (45 days ago)
+    // Calculate cutoff date (45 days ago) using UTC to avoid DST issues
     const retentionDays = 45;
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+    cutoffDate.setUTCDate(cutoffDate.getUTCDate() - retentionDays);
     const cutoffDateStr = cutoffDate.toISOString();
 
     console.log(`Deleting notifications older than: ${cutoffDateStr} (${retentionDays} days ago)`);

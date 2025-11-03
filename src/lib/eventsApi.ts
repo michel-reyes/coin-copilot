@@ -19,6 +19,8 @@ export interface Event {
   recurrence_type: RecurrenceType;
   recurrence_interval?: number; // For custom recurrence
   is_active: boolean;
+  account_id?: string; // Optional link to Lunch Money account
+  institution_name?: string; // Optional institution name for account identification
   created_at: string;
   updated_at: string;
 }
@@ -43,6 +45,8 @@ export interface CreateEventData {
   due_date: string; // YYYY-MM-DD
   recurrence_type: RecurrenceType;
   recurrence_interval?: number;
+  account_id?: string;
+  institution_name?: string;
 }
 
 export interface CreateNotificationScheduleData {
@@ -81,29 +85,25 @@ export async function getEventById(
 ): Promise<{ data: EventWithSchedules | null; error: any }> {
   const { data: event, error: eventError } = await supabase
     .from('events')
-    .select('*')
+    .select(`
+      *,
+      event_notification_schedules(*)
+    `)
     .eq('id', eventId)
+    .eq('event_notification_schedules.is_active', true)
+    .order('days_before', { ascending: false, referencedTable: 'event_notification_schedules' })
     .single();
 
   if (eventError || !event) {
     return { data: null, error: eventError };
   }
 
-  const { data: schedules, error: schedulesError } = await supabase
-    .from('event_notification_schedules')
-    .select('*')
-    .eq('event_id', eventId)
-    .eq('is_active', true)
-    .order('days_before', { ascending: false });
-
-  if (schedulesError) {
-    return { data: null, error: schedulesError };
-  }
+  const eventData = event as any;
 
   return {
     data: {
-      ...event,
-      notification_schedules: schedules || [],
+      ...eventData,
+      notification_schedules: eventData.event_notification_schedules || [],
     },
     error: null,
   };
@@ -316,6 +316,131 @@ export async function getNotificationHistory(options?: {
 }
 
 /**
+ * Get event by account ID and institution name
+ */
+export async function getEventByAccount(
+  accountId: string,
+  institutionName: string
+): Promise<{ data: EventWithSchedules | null; error: any }> {
+  const { data: events, error: eventError } = await supabase
+    .from('events')
+    .select(`
+      *,
+      event_notification_schedules(*)
+    `)
+    .eq('account_id', accountId)
+    .eq('institution_name', institutionName)
+    .eq('is_active', true)
+    .eq('event_notification_schedules.is_active', true)
+    .order('days_before', { ascending: false, referencedTable: 'event_notification_schedules' })
+    .limit(1);
+
+  if (eventError || !events || events.length === 0) {
+    return { data: null, error: eventError };
+  }
+
+  const event = events[0] as any;
+
+  return {
+    data: {
+      ...event,
+      notification_schedules: event.event_notification_schedules || [],
+    },
+    error: null,
+  };
+}
+
+/**
+ * Update or create a credit card event for an account
+ */
+export async function updateOrCreateCreditCardEvent(
+  accountId: string,
+  institutionName: string,
+  accountDisplayName: string,
+  dueDay: number
+): Promise<{ data: EventWithSchedules | null; error: any }> {
+  // Calculate due date: current year/month with the specified day
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
+  const dueDate = new Date(year, month, dueDay);
+  const dueDateString = formatDateForDB(dueDate);
+
+  const eventData: CreateEventData = {
+    event_type: 'credit_card',
+    title: `${accountDisplayName} Payment Due`,
+    due_date: dueDateString,
+    recurrence_type: 'monthly',
+    account_id: accountId,
+    institution_name: institutionName,
+  };
+
+  const notificationSchedules: CreateNotificationScheduleData[] = [
+    { days_before: 7, notification_time: '09:00:00' },
+    { days_before: 0, notification_time: '08:00:00' },
+  ];
+
+  // Check if event already exists
+  const { data: existingEvent } = await getEventByAccount(
+    accountId,
+    institutionName
+  );
+
+  if (existingEvent) {
+    // Update existing event
+    const { data: updatedEvent, error: updateError } = await updateEvent(
+      existingEvent.id,
+      {
+        title: eventData.title,
+        due_date: eventData.due_date,
+        recurrence_type: eventData.recurrence_type,
+      }
+    );
+
+    if (updateError || !updatedEvent) {
+      return { data: null, error: updateError };
+    }
+
+    // Return updated event with existing schedules (schedules unchanged)
+    return {
+      data: {
+        ...updatedEvent,
+        notification_schedules: existingEvent.notification_schedules,
+      },
+      error: null,
+    };
+  } else {
+    // Create new event
+    return await createEvent(eventData, notificationSchedules);
+  }
+}
+
+/**
+ * Delete event by account ID and institution name (soft delete)
+ */
+export async function deleteEventByAccount(
+  accountId: string,
+  institutionName: string
+): Promise<{ data: Event | null; error: any }> {
+  // Directly update to soft-delete in single query
+  const { data, error } = await supabase
+    .from('events')
+    .update({ is_active: false })
+    .eq('account_id', accountId)
+    .eq('institution_name', institutionName)
+    .eq('is_active', true) // Only delete if currently active
+    .select()
+    .single();
+
+  // If no rows affected, return null (event doesn't exist or already deleted)
+  if (error?.code === 'PGRST116') {
+    return { data: null, error: null };
+  }
+
+  return { data, error };
+}
+
+/**
  * Format a date to YYYY-MM-DD string
  */
 export function formatDateForDB(date: Date): string {
@@ -343,7 +468,7 @@ export function parseTimeString(timeString: string): {
   minutes: number;
   seconds: number;
 } {
-  const [hours, minutes, seconds = '0'] = timeString.split(':').map(Number);
+  const [hours, minutes, seconds = 0] = timeString.split(':').map(Number);
   return { hours, minutes, seconds };
 }
 
@@ -355,13 +480,19 @@ export function getRecurrenceDescription(event: Event): string {
     case 'one_time':
       return 'One time';
     case 'monthly':
-      const day = new Date(event.due_date).getDate();
+      // Parse date string manually to avoid timezone issues
+      const [, , dayStr] = event.due_date.split('-');
+      const day = parseInt(dayStr, 10);
       const suffix =
         day === 1 ? 'st' : day === 2 ? 'nd' : day === 3 ? 'rd' : 'th';
       return `Monthly on the ${day}${suffix}`;
     case 'weekly':
-      const dayName = new Date(event.due_date).toLocaleDateString('en-US', {
+      // Parse date as UTC to avoid timezone shifts
+      const [year, month, dayOfMonth] = event.due_date.split('-').map(Number);
+      const date = new Date(Date.UTC(year, month - 1, dayOfMonth));
+      const dayName = date.toLocaleDateString('en-US', {
         weekday: 'long',
+        timeZone: 'UTC',
       });
       return `Every ${dayName}`;
     case 'custom':
