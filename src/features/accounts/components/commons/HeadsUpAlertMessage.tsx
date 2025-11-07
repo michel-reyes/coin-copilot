@@ -6,6 +6,8 @@ interface HeadsUpAlertMessageProps {
     dueMonthDay?: string;
     dueWarningColor?: '' | 'label' | 'tertiaryLabel' | 'error' | 'warning';
     isLoading?: boolean;
+    isAccountInactive?: boolean;
+    isIncome?: boolean;
 }
 
 const HeadsUpAlertMessage = ({
@@ -14,13 +16,23 @@ const HeadsUpAlertMessage = ({
     dueMonthDay,
     dueWarningColor,
     isLoading = false,
+    isAccountInactive = false,
+    isIncome = false,
 }: HeadsUpAlertMessageProps) => {
     if (isLoading) {
         return <Text>Loading...</Text>;
     }
 
+    if (isIncome) {
+        return (
+            <Text variant='caption1' className='font-bold text-right'>
+                Debit account
+            </Text>
+        );
+    }
+
     return (
-        <View className='flex-1 gap-1'>
+        <View className='flex-1 gap-1 justify-center'>
             {accountInactiveMessage && (
                 <Text
                     variant='caption1'
@@ -29,7 +41,7 @@ const HeadsUpAlertMessage = ({
                     {accountInactiveMessage}
                 </Text>
             )}
-            {dueDayAtMessage && (
+            {!isAccountInactive && dueDayAtMessage ? ( // Check for account status
                 <View className='flex-1 flex-row items-center justify-between'>
                     <Text
                         variant='footnote'
@@ -50,6 +62,21 @@ const HeadsUpAlertMessage = ({
                         </Text>
                     </Text>
                 </View>
+            ) : (
+                !isIncome && ( // Check for account status again
+                    <View className='flex-1 flex-row items-center justify-between'>
+                        <Text
+                            variant='footnote'
+                            color='tertiaryLabel'
+                            className='font-bold'
+                        >
+                            Due on {` `}
+                            <Text variant='footnote' className='font-bold'>
+                                {dueMonthDay}
+                            </Text>
+                        </Text>
+                    </View>
+                )
             )}
         </View>
     );

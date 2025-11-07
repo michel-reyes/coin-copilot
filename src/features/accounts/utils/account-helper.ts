@@ -133,6 +133,7 @@ export function checkAccountDueDay(dueDay = 0) {
         } else {
             // No specific message for other ranges (e.g., > 13 days or past due beyond 'Today')
             // `at` remains empty, so dueDayMessage will not be set by the `if (at)` block later
+            dueDayAtMessage = ``;
         }
     }
 

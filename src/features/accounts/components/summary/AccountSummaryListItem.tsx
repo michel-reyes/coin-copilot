@@ -102,6 +102,7 @@ export default function AccountSummaryListItem({
                             dueMonthDay={dueMonthDay}
                             dueWarningColor={dueWarningColor}
                             isLoading={isLoading}
+                            isIncome={account.isIncome}
                         />
                     </View>
                 }

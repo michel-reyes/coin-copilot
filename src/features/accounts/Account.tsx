@@ -41,6 +41,7 @@ export default function Account({ account }: { account: NormalizedAccount }) {
                             dueMonthDay={dueMonthDay}
                             dueWarningColor={dueWarningColor}
                             isLoading={isLoading}
+                            isIncome={account.isIncome}
                         />
                     </View>
                 </View>
