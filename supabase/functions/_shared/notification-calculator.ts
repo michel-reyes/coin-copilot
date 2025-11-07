@@ -3,7 +3,17 @@
  *
  * Logic for calculating when notifications should be sent based on
  * event recurrence patterns and notification schedules
+ *
+ * Uses dayjs for timezone-aware date/time calculations
  */
+
+import dayjs from 'https://esm.sh/dayjs@1.11.10';
+import utc from 'https://esm.sh/dayjs@1.11.10/plugin/utc';
+import timezone from 'https://esm.sh/dayjs@1.11.10/plugin/timezone';
+
+// Configure dayjs
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export type RecurrenceType = 'monthly' | 'weekly' | 'custom' | 'one_time';
 
@@ -17,6 +27,7 @@ export interface Event {
   recurrence_type: RecurrenceType;
   recurrence_interval?: number;
   is_active: boolean;
+  user_timezone?: string; // IANA timezone from user_api_keys table
 }
 
 export interface NotificationSchedule {
@@ -32,6 +43,7 @@ export interface PendingNotification {
   schedule: NotificationSchedule;
   target_date: Date; // The actual event occurrence date
   notification_datetime: Date; // When to send the notification
+  user_timezone?: string; // User's IANA timezone (e.g., 'America/New_York')
 }
 
 /**
@@ -39,8 +51,7 @@ export interface PendingNotification {
  * Uses UTC to avoid timezone issues
  */
 export function parseDate(dateString: string): Date {
-  const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(Date.UTC(year, month - 1, day)); // month is 0-indexed, use UTC
+  return dayjs.utc(dateString, 'YYYY-MM-DD').toDate();
 }
 
 /**
@@ -50,47 +61,33 @@ export function shouldEventOccurOnDate(
   event: Event,
   checkDate: Date
 ): boolean {
-  const dueDate = parseDate(event.due_date);
-  const checkDateOnly = new Date(
-    Date.UTC(
-      checkDate.getUTCFullYear(),
-      checkDate.getUTCMonth(),
-      checkDate.getUTCDate()
-    )
-  );
-  const dueDateOnly = new Date(
-    Date.UTC(
-      dueDate.getUTCFullYear(),
-      dueDate.getUTCMonth(),
-      dueDate.getUTCDate()
-    )
-  );
+  const dueDate = dayjs.utc(event.due_date);
+  const checkDateUtc = dayjs.utc(checkDate).startOf('day');
+  const dueDateUtc = dueDate.startOf('day');
 
   // Event hasn't started yet
-  if (checkDateOnly < dueDateOnly) {
+  if (checkDateUtc.isBefore(dueDateUtc)) {
     return false;
   }
 
   switch (event.recurrence_type) {
     case 'one_time':
-      return checkDateOnly.getTime() === dueDateOnly.getTime();
+      return checkDateUtc.isSame(dueDateUtc, 'day');
 
     case 'monthly':
-      // Occurs on the same day of each month (UTC)
-      return checkDateOnly.getUTCDate() === dueDateOnly.getUTCDate();
+      // Occurs on the same day of each month
+      return checkDateUtc.date() === dueDateUtc.date();
 
     case 'weekly':
-      // Occurs on the same day of week (UTC)
-      return checkDateOnly.getUTCDay() === dueDateOnly.getUTCDay();
+      // Occurs on the same day of week
+      return checkDateUtc.day() === dueDateUtc.day();
 
     case 'custom':
       // Occurs every N days
       if (!event.recurrence_interval || event.recurrence_interval <= 0) {
         return false;
       }
-      const daysSinceDue = Math.floor(
-        (checkDateOnly.getTime() - dueDateOnly.getTime()) / (1000 * 60 * 60 * 24)
-      );
+      const daysSinceDue = checkDateUtc.diff(dueDateUtc, 'day');
       return daysSinceDue % event.recurrence_interval === 0;
 
     default:
@@ -105,23 +102,22 @@ export function getNextOccurrence(
   event: Event,
   fromDate: Date = new Date()
 ): Date | null {
-  const dueDate = parseDate(event.due_date);
-  const checkDate = new Date(fromDate);
+  const dueDate = dayjs.utc(event.due_date);
 
   // For one-time events, always return the due date
   // The caller (edge function) will filter by time window (24-hour catchup)
   // This allows notifications to be sent for events created after their due date
   if (event.recurrence_type === 'one_time') {
-    return dueDate;
+    return dueDate.toDate();
   }
 
   // For recurring events, find next occurrence within next 365 days
+  let checkDate = dayjs.utc(fromDate).startOf('day');
   for (let i = 0; i < 365; i++) {
-    if (shouldEventOccurOnDate(event, checkDate)) {
-      return checkDate;
+    if (shouldEventOccurOnDate(event, checkDate.toDate())) {
+      return checkDate.toDate();
     }
-    // Use UTC to avoid DST issues
-    checkDate.setUTCDate(checkDate.getUTCDate() + 1);
+    checkDate = checkDate.add(1, 'day');
   }
 
   return null; // No occurrence found in next year
@@ -170,7 +166,8 @@ export function calculatePendingNotifications(
       const notificationDatetime = calculateNotificationDatetime(
         nextOccurrence,
         schedule.days_before,
-        schedule.notification_time
+        schedule.notification_time,
+        event.user_timezone || 'UTC' // Use user's timezone or default to UTC
       );
 
       // Check if notification falls within our time window
@@ -183,6 +180,7 @@ export function calculatePendingNotifications(
           schedule,
           target_date: nextOccurrence,
           notification_datetime: notificationDatetime,
+          user_timezone: event.user_timezone,
         });
       }
     }
@@ -194,27 +192,34 @@ export function calculatePendingNotifications(
 /**
  * Calculate the exact datetime to send a notification
  *
- * @param targetDate - The event occurrence date
+ * @param targetDate - The event occurrence date (in UTC)
  * @param daysBefore - How many days before the event to notify (0 = on the day)
- * @param notificationTime - Time of day in HH:MM:SS format
- * @returns Exact datetime to send notification
+ * @param notificationTime - Time of day in HH:MM:SS format (in user's timezone)
+ * @param userTimezone - IANA timezone identifier (e.g., 'America/New_York')
+ * @returns Exact datetime to send notification (in UTC)
  */
 export function calculateNotificationDatetime(
   targetDate: Date,
   daysBefore: number,
-  notificationTime: string
+  notificationTime: string,
+  userTimezone: string = 'UTC'
 ): Date {
-  const notificationDate = new Date(targetDate);
-  // Use UTC to avoid DST issues
-  notificationDate.setUTCDate(notificationDate.getUTCDate() - daysBefore);
+  // Get the target date and subtract days_before
+  const targetDateUtc = dayjs.utc(targetDate).startOf('day');
+  const notificationDateUtc = targetDateUtc.subtract(daysBefore, 'day');
 
   // Parse time (HH:MM:SS format)
-  const [hours, minutes, seconds = '0'] = notificationTime.split(':').map(Number);
+  const [hours, minutes, seconds = 0] = notificationTime.split(':').map(Number);
 
-  // Use UTC to avoid DST issues - notification times are interpreted as UTC
-  notificationDate.setUTCHours(hours, minutes, parseInt(seconds.toString()), 0);
+  // Create notification datetime in user's timezone
+  // This interprets "08:00:00" as 8 AM in user's local time, not UTC
+  const notificationDateInUserTz = dayjs.tz(
+    notificationDateUtc.format('YYYY-MM-DD'),
+    userTimezone
+  ).hour(hours).minute(minutes).second(seconds);
 
-  return notificationDate;
+  // Convert back to UTC for storage and comparison
+  return notificationDateInUserTz.utc().toDate();
 }
 
 /**
@@ -253,8 +258,5 @@ export function formatNotificationMessage(
  * Format Date to ISO date string (YYYY-MM-DD) in UTC
  */
 export function formatISODate(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return dayjs.utc(date).format('YYYY-MM-DD');
 }

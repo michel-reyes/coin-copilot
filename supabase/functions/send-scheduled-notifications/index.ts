@@ -54,17 +54,28 @@ Deno.serve(async (req) => {
     console.log(`Processing window: ${windowStart.toISOString()} to ${windowEnd.toISOString()}`);
     console.log(`Current time: ${now.toISOString()}`);
 
-    // Fetch all active events
+    // Fetch all active events with user timezone
+    // Join with user_api_keys to get timezone for each event
     const { data: events, error: eventsError } = await supabaseAdmin
       .from('events')
-      .select('*')
+      .select(`
+        *,
+        user_api_keys!inner(timezone)
+      `)
       .eq('is_active', true);
 
     if (eventsError) {
       throw new Error(`Error fetching events: ${eventsError.message}`);
     }
 
-    if (!events || events.length === 0) {
+    // Transform data to include user_timezone at the event level
+    const eventsWithTimezone = events?.map((event: any) => ({
+      ...event,
+      user_timezone: event.user_api_keys?.timezone || 'UTC',
+      user_api_keys: undefined, // Remove nested object
+    })) || [];
+
+    if (!eventsWithTimezone || eventsWithTimezone.length === 0) {
       console.log('No active events found');
       return new Response(
         JSON.stringify({
@@ -85,10 +96,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Found ${events.length} active events`);
+    console.log(`Found ${eventsWithTimezone.length} active events`);
+
+    // Log timezone info for debugging
+    const timezones = [...new Set(eventsWithTimezone.map((e: any) => e.user_timezone))];
+    console.log(`User timezones in events: ${timezones.join(', ')}`);
 
     // Fetch all active notification schedules
-    const eventIds = events.map((e) => e.id);
+    const eventIds = eventsWithTimezone.map((e) => e.id);
     const { data: schedules, error: schedulesError } = await supabaseAdmin
       .from('event_notification_schedules')
       .select('*')
@@ -123,8 +138,9 @@ Deno.serve(async (req) => {
     console.log(`Found ${schedules.length} active notification schedules`);
 
     // Calculate which notifications should be sent in this window
+    // eventsWithTimezone now includes user_timezone for proper timezone handling
     const pendingNotifications = calculatePendingNotifications(
-      events as Event[],
+      eventsWithTimezone as Event[],
       schedules as NotificationSchedule[],
       windowStart,
       windowEnd
