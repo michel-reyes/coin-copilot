@@ -1,4 +1,5 @@
 import { Transaction } from '@/api/types/apiTypes';
+import { TODAY } from '@/utils/date-utils';
 
 /**
  * Sorts the transactions by date
@@ -16,4 +17,18 @@ export function sortTransactionsByDate(
             ? a.date.localeCompare(b.date)
             : b.date.localeCompare(a.date);
     });
+}
+
+// -------------------------------------------------------------------
+
+/**
+ * Function to get the oldest transaction date from data
+ * Define this function before using it in onSuccess
+ * @param data
+ * @returns string YYYY-MM-DD
+ */
+export function getOldestTransactionDate(data?: Transaction[]) {
+    if (!data || data.length === 0) return TODAY;
+    const oldestDate = data.at(-1)?.date || TODAY;
+    return oldestDate;
 }

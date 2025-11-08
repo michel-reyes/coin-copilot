@@ -9,7 +9,7 @@ export default function Account({ account }: { account: NormalizedAccount }) {
     const {
         data: accountSetting,
         isLoading: isLoadingAccountSetting,
-        isError,
+        isError: isErrorAccountSetting,
     } = useGetAccountSettings(account.id.toString(), account.institution_name);
     const accountDetails = useAccountDetails(account, accountSetting, true);
 
@@ -24,9 +24,9 @@ export default function Account({ account }: { account: NormalizedAccount }) {
 
     return (
         <AccountDetails
+            isError={isErrorAccountSetting || isErrorTransactions}
             isLoading={isLoadingAccountSetting || isLoadingTransactions}
             account={account}
-            settings={accountSetting}
             details={accountDetails}
             transactions={sortedTransactions}
         />

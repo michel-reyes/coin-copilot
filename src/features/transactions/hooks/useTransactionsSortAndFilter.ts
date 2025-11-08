@@ -1,5 +1,5 @@
 import { Transaction } from '@/api/types/apiTypes';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 // ----------------------------------------------------------------
 
@@ -71,7 +71,7 @@ export interface UseTransactionFiltersOptions {
 }
 
 export interface TransactionsSortFilterProps {
-    listTitle: string;
+    listTitle: React.ReactNode;
     activeFilter: TransactionFilterOption;
     setFilter: (filter: TransactionFilterOption) => void;
     activeSortOption: TransactionSortOption;
