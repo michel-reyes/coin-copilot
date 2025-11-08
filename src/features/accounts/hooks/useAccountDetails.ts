@@ -41,9 +41,9 @@ const useAccountDetails = (
     );
 
     return {
+        name,
         mask,
         balance,
-        name,
         dueDay,
         accountInactiveMessage,
         dueDayAtMessage,
