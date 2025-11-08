@@ -1,12 +1,9 @@
 import { useGetAccountSettings } from '@/api/hooks/use-supabase-queries';
 import { NormalizedAccount } from '@/api/types/queryTypes';
-import { ListItem, Text, View } from '@/components/commons';
-import { IconSymbol } from '@/components/os/IconSymbol';
-import AccountMask from '@/features/accounts/components/commons/AccountMask';
+import { ListItem, Text } from '@/components/commons';
 import { BankLogo } from '@/features/accounts/components/commons/BankLogo';
 import HeadsUpAlertMessage from '@/features/accounts/components/commons/HeadsUpAlertMessage';
 import useAccountDetails from '@/features/accounts/hooks/useAccountDetails';
-import colors from '@/themes/colors';
 
 // ------------------------------------------------------------
 
@@ -67,21 +64,14 @@ export default function AccountSummaryListItem({
                 }
                 hint={<Text variant='headline'>{balance}</Text>}
                 description={
-                    <View className='flex-row items-center gap-3 flex-1'>
-                        <AccountMask mask={mask} />
-
-                        <View className='flex-row items-center gap-1'>
-                            <IconSymbol
-                                name='triangle.tophalf.filled'
-                                color={colors['system-white']}
-                                size={18}
-                            />
-
-                            <Text variant='headline' color='tertiaryLabel'>
-                                {limitLabel}
-                            </Text>
-                        </View>
-                    </View>
+                    <HeadsUpAlertMessage
+                        accountInactiveMessage={accountInactiveMessage}
+                        dueDayAtMessage={dueDayAtMessage}
+                        dueMonthDay={dueMonthDay}
+                        dueWarningColor={dueWarningColor}
+                        isLoading={isLoading}
+                        isIncome={account.isIncome}
+                    />
                 }
                 descriptionHint={
                     <Text
@@ -93,18 +83,6 @@ export default function AccountSummaryListItem({
                             {usagePercentageText}
                         </Text>
                     </Text>
-                }
-                metadata={
-                    <View className='mt-3'>
-                        <HeadsUpAlertMessage
-                            accountInactiveMessage={accountInactiveMessage}
-                            dueDayAtMessage={dueDayAtMessage}
-                            dueMonthDay={dueMonthDay}
-                            dueWarningColor={dueWarningColor}
-                            isLoading={isLoading}
-                            isIncome={account.isIncome}
-                        />
-                    </View>
                 }
             />
         </>

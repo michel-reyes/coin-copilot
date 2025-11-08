@@ -25,7 +25,11 @@ const HeadsUpAlertMessage = ({
 
     if (isIncome) {
         return (
-            <Text variant='caption1' className='font-bold text-right'>
+            <Text
+                variant='footnote'
+                color='tertiaryLabel'
+                className='font-bold text-right'
+            >
                 Debit account
             </Text>
         );
