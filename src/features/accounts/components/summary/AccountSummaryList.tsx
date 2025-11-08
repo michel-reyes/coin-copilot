@@ -12,12 +12,16 @@ export default function AccountSummaryList({
     accounts,
     networth,
 }: AccountSummaryListProps) {
+    const netWorthValue = formatCurrency(networth);
     return (
         <View className='flex-1'>
-            <Text color='secondaryLabel'>
-                Net Worth: <Text>{formatCurrency(networth)}</Text>
-            </Text>
-            <Text>Accounts:</Text>
+            <View className='gap-1 ml-3'>
+                <Text variant='title3'>Net Worth</Text>
+                <Text isNumeric variant='title3' color='secondaryLabel'>
+                    {netWorthValue}
+                </Text>
+            </View>
+
             {accounts.map((account) => (
                 <AccountSummaryListItem key={account.id} account={account} />
             ))}
