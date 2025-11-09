@@ -78,7 +78,7 @@ export default function AccountCard({
                 </View>
                 <View className='flex-row gap-1 justify-between mt-3'>
                     <Text variant='body' color='secondaryLabel'>
-                        Usage percentage
+                        Used percentage
                     </Text>
                     <Text variant='body' color={usageColor}>
                         {usagePercentageText}

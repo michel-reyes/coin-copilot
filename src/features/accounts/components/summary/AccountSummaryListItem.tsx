@@ -1,9 +1,11 @@
 import { useGetAccountSettings } from '@/api/hooks/use-supabase-queries';
 import { NormalizedAccount } from '@/api/types/queryTypes';
-import { ListItem, Text } from '@/components/commons';
+import { ListItem, Text, View } from '@/components/commons';
+import { IconSymbol } from '@/components/os/IconSymbol';
 import { BankLogo } from '@/features/accounts/components/commons/BankLogo';
 import HeadsUpAlertMessage from '@/features/accounts/components/commons/HeadsUpAlertMessage';
 import useAccountDetails from '@/features/accounts/hooks/useAccountDetails';
+import colors from '@/themes/colors';
 
 // ------------------------------------------------------------
 
@@ -62,24 +64,47 @@ export default function AccountSummaryListItem({
                         {name}
                     </Text>
                 }
-                hint={<Text variant='headline'>{balance}</Text>}
+                hint={
+                    <Text
+                        variant='headline'
+                        isNumeric
+                        color={account.isIncome ? 'success' : 'label'}
+                    >
+                        {balance}
+                    </Text>
+                }
                 description={
-                    <HeadsUpAlertMessage
-                        accountInactiveMessage={accountInactiveMessage}
-                        dueDayAtMessage={dueDayAtMessage}
-                        dueMonthDay={dueMonthDay}
-                        dueWarningColor={dueWarningColor}
-                        isLoading={isLoading}
-                        isIncome={account.isIncome}
-                    />
+                    <View className='flex-row gap-2 flex-1'>
+                        {accountInactiveMessage && (
+                            <IconSymbol
+                                weight='bold'
+                                name='bolt.slash.fill'
+                                color={colors['system-yellow']}
+                                size={20}
+                            />
+                        )}
+                        <HeadsUpAlertMessage
+                            accountInactiveMessage=''
+                            dueDayAtMessage={dueDayAtMessage}
+                            dueMonthDay={dueMonthDay}
+                            dueWarningColor={dueWarningColor}
+                            isLoading={isLoading}
+                            isIncome={account.isIncome}
+                        />
+                    </View>
                 }
                 descriptionHint={
                     <Text
                         color='tertiaryLabel'
-                        className='font-bold mr-0 pr-0 ml-auto'
+                        variant='footnote'
+                        className='mr-0 pr-0 ml-auto font-bold'
                     >
-                        Usage {` `}
-                        <Text variant='headline' color={usageColor}>
+                        Used {` `}
+                        <Text
+                            variant='footnote'
+                            color={usageColor}
+                            className=' font-bold'
+                        >
                             {usagePercentageText}
                         </Text>
                     </Text>

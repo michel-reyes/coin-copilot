@@ -90,17 +90,27 @@ export function Text({
                     'text-system-blue': color === 'link',
                     'text-system-green': color === 'success',
                     'text-system-red': color === 'error',
-                    'text-system-orange': color === 'warning',
+                    'text-system-yellow': color === 'warning',
                 },
                 // Custom className (highest precedence)
                 className
             )}
             style={[
                 {
+                    // Use tabular numbers for numeric content to improve alignment
                     fontVariant: isNumeric ? ['tabular-nums'] : undefined,
-                    fontFamily: shouldUseSemibold
-                        ? 'SFProRoundedSemibold'
-                        : 'SFProRoundedRegular',
+                    // Prefer monospaced SF fonts when numeric mode is enabled.
+                    // If numeric + semibold, use SFMonoSemibold; otherwise SFMonoRegular.
+                    // If not numeric, keep the rounded SFProRounded family logic.
+                    fontFamily: isNumeric
+                        ? shouldUseSemibold
+                            ? 'SFMonoSemibold'
+                            : 'SFMonoRegular'
+                        : shouldUseSemibold
+                          ? 'SFProRoundedSemibold'
+                          : 'SFProRoundedRegular',
+                    // Slight letter spacing reset for monospace numerics to match UI expectations
+                    letterSpacing: isNumeric ? -0.35 : undefined,
                 },
                 // Custom style overrides everything
                 style,

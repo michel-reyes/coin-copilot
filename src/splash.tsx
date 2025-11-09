@@ -5,18 +5,20 @@ import { SplashScreen } from 'expo-router';
 SplashScreen.preventAutoHideAsync();
 
 export default function SplashScreenController() {
-  const { isLoading } = useSession();
+    const { isLoading } = useSession();
 
-  const [fontLoaded] = useFonts({
-    SFProRoundedRegular: require('../assets/fonts/SFProRounded-Regular.ttf'),
-    SFProRoundedSemibold: require('../assets/fonts/SFProRounded-Semibold.ttf'),
-  });
+    const [fontLoaded] = useFonts({
+        SFProRoundedRegular: require('../assets/fonts/SFProRounded-Regular.ttf'),
+        SFProRoundedSemibold: require('../assets/fonts/SFProRounded-Semibold.ttf'),
+        SFMonoRegular: require('../assets/fonts/SFMonoRegular.otf'),
+        SFMonoSemibold: require('../assets/fonts/SFMonoSemibold.otf'),
+    });
 
-  const appIsLoaded = isLoading && fontLoaded;
+    const appIsLoaded = isLoading && fontLoaded;
 
-  if (!appIsLoaded) {
-    SplashScreen.hide();
-  }
+    if (!appIsLoaded) {
+        SplashScreen.hide();
+    }
 
-  return null;
+    return null;
 }

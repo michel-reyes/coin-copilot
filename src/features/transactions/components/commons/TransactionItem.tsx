@@ -131,6 +131,7 @@ export default function TransactionItem({
                 descriptionHint={
                     <Text
                         variant='headline'
+                        isNumeric
                         color={transaction.is_income ? 'success' : 'label'}
                     >
                         {amount}

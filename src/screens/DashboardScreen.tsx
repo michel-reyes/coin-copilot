@@ -1,15 +1,104 @@
-import { ScreenScrollView, Text, View } from '@/components/commons';
+import { Divider, ScreenScrollView, Text, View } from '@/components/commons';
 import AccountSummary from '@/features/accounts/AccountSummary';
-import { Stack } from 'expo-router';
 
 export default function DashboardScreen() {
     return (
         <>
-            <Stack.Screen options={{ title: 'Michel' }} />
             <ScreenScrollView>
-                <View className='flex-1'>
-                    <Text>Transactions</Text>
-                    <Text>Budget</Text>
+                <View className='flex-row mx-3 gap-3 mt-12'>
+                    {/* left */}
+                    <View className='flex-1'>
+                        {/* title */}
+                        <View className='mb-3'>
+                            <Text variant='title3' className='mx-3'>
+                                Period
+                            </Text>
+                            <Text
+                                variant='headline'
+                                color='tertiaryLabel'
+                                className='mx-3'
+                            >
+                                Summary
+                            </Text>
+                        </View>
+                        <View variant='card'>
+                            <View className='gap-3'>
+                                <View className='gap-1'>
+                                    <Text
+                                        variant='footnote'
+                                        color='tertiaryLabel'
+                                        className='font-bold'
+                                    >
+                                        Income
+                                    </Text>
+                                    <Text isNumeric variant='headline'>
+                                        $6,000.00
+                                    </Text>
+                                </View>
+                                <Divider />
+                                <View className='gap-1'>
+                                    <Text
+                                        variant='footnote'
+                                        color='tertiaryLabel'
+                                        className='font-bold'
+                                    >
+                                        Expenses
+                                    </Text>
+                                    <Text isNumeric variant='headline'>
+                                        $3,000.00
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                    {/* right */}
+                    <View className='flex-1'>
+                        {/* title */}
+                        <View className='mb-3'>
+                            <Text variant='title3' className='mx-3'>
+                                Budget
+                            </Text>
+                            <Text
+                                variant='headline'
+                                color='tertiaryLabel'
+                                className='mx-3'
+                            >
+                                Overview
+                            </Text>
+                        </View>
+                        <View variant='card'>
+                            <View className='gap-3'>
+                                <View className='gap-1'>
+                                    <Text
+                                        variant='footnote'
+                                        color='tertiaryLabel'
+                                        className='font-bold'
+                                    >
+                                        Available Funds
+                                    </Text>
+                                    <Text isNumeric variant='headline'>
+                                        $6,000.00
+                                    </Text>
+                                </View>
+                                <Divider />
+                                <View className='gap-1'>
+                                    <Text
+                                        variant='footnote'
+                                        color='tertiaryLabel'
+                                        className='font-bold'
+                                    >
+                                        Planned Expending
+                                    </Text>
+                                    <Text isNumeric variant='headline'>
+                                        $3,000.00
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+
+                <View className='flex-1 mx-3 mt-12'>
                     <AccountSummary />
                 </View>
             </ScreenScrollView>

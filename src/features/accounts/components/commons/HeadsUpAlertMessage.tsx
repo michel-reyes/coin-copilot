@@ -1,7 +1,7 @@
 import { Text, View } from '@/components/commons';
 
 interface HeadsUpAlertMessageProps {
-    accountInactiveMessage?: string | null;
+    accountInactiveMessage?: React.ReactNode;
     dueDayAtMessage?: string;
     dueMonthDay?: string;
     dueWarningColor?: '' | 'label' | 'tertiaryLabel' | 'error' | 'warning';

@@ -1,4 +1,4 @@
-import { Text, View } from '@/components/commons';
+import { Text } from '@/components/commons';
 import AccountSummaryList from '@/features/accounts/components/summary/AccountSummaryList';
 import useAccounts from '@/features/accounts/hooks/useAccounts';
 
@@ -19,9 +19,5 @@ export default function AccountSummary() {
 
     const netWorth = getNetWoth(userAccounts);
 
-    return (
-        <View>
-            <AccountSummaryList accounts={userAccounts} networth={netWorth} />
-        </View>
-    );
+    return <AccountSummaryList accounts={userAccounts} networth={netWorth} />;
 }
