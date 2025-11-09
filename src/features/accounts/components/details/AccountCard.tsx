@@ -62,7 +62,9 @@ export default function AccountCard({
                     <Text variant='body' color='secondaryLabel'>
                         Total balance
                     </Text>
-                    <Text variant='title2'>{balance}</Text>
+                    <Text variant='title2' isNumeric>
+                        {balance}
+                    </Text>
                 </View>
 
                 <View className='flex-row gap-1 justify-between mt-3'>
@@ -71,6 +73,7 @@ export default function AccountCard({
                     </Text>
                     <Text
                         variant='body'
+                        isNumeric
                         color={limitValue > 0 ? 'label' : 'tertiaryLabel'}
                     >
                         {limitLabel}
@@ -80,7 +83,7 @@ export default function AccountCard({
                     <Text variant='body' color='secondaryLabel'>
                         Used percentage
                     </Text>
-                    <Text variant='body' color={usageColor}>
+                    <Text variant='body' color={usageColor} isNumeric>
                         {usagePercentageText}
                     </Text>
                 </View>

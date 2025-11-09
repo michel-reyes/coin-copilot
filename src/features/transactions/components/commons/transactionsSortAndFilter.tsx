@@ -205,9 +205,13 @@ export default function TransactionsSortFilter({
 
             <Divider />
 
-            <Text variant='title3' className='mb-3 mt-6 ml-4'>
-                {listTitle}
-            </Text>
+            <View className='mb-3 mt-6 ml-4 flex-1'>
+                {typeof listTitle === 'string' ? (
+                    <Text variant='title3'>{listTitle}</Text>
+                ) : (
+                    listTitle
+                )}
+            </View>
 
             <SortSection
                 activeSortOption={activeSortOption}

@@ -4,7 +4,7 @@ import { Text, View } from '@/components/commons';
 import TransactionItem from '@/features/transactions/components/commons/TransactionItem';
 import TransactionsSortFilter from '@/features/transactions/components/commons/transactionsSortAndFilter';
 import useTransactionsSortAndFilter from '@/features/transactions/hooks/useTransactionsSortAndFilter';
-import { getOldestTransactionDate } from '@/features/transactions/utils/transactions-helper';
+import { getTransactionDateRange } from '@/features/transactions/utils/transactions-helper';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AccountCard, { type AccountCardProps } from './AccountCard';
@@ -46,7 +46,15 @@ export default function AccountDetails({
     });
 
     const showFilter = paginatedTransactions.length > 0;
-    const filterTitle = `Latest Transactions (${getOldestTransactionDate(transactions)})`;
+    const { start, end } = getTransactionDateRange(transactions);
+    const filterTitle = (
+        <View className='gap-1'>
+            <Text variant='subhead' color='tertiaryLabel'>
+                {start}-{end}
+            </Text>
+            <Text variant='title3'>Latest Transactions</Text>
+        </View>
+    );
 
     if (isError) {
         return (

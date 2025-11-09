@@ -22,13 +22,21 @@ export function sortTransactionsByDate(
 // -------------------------------------------------------------------
 
 /**
- * Function to get the oldest transaction date from data
- * Define this function before using it in onSuccess
+ * Function to get transaction date range
  * @param data
- * @returns string YYYY-MM-DD
+ * @returns <Record> {.start, end }
  */
-export function getOldestTransactionDate(data?: Transaction[]) {
-    if (!data || data.length === 0) return TODAY;
-    const oldestDate = data.at(-1)?.date || TODAY;
-    return oldestDate;
+export function getTransactionDateRange(data?: Transaction[]) {
+    if (!data || data.length === 0)
+        return {
+            start: TODAY,
+            end: TODAY,
+        };
+
+    const endDate = data.at(-1)?.date || TODAY;
+    const startDate = data.at(0)?.date || TODAY;
+    return {
+        start: startDate,
+        end: endDate,
+    };
 }
