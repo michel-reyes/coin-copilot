@@ -1,5 +1,7 @@
 import { Divider, ScreenScrollView, Text, View } from '@/components/commons';
+import { IconSymbol } from '@/components/os/IconSymbol.ios';
 import AccountSummary from '@/features/accounts/AccountSummary';
+import colors from '@/themes/colors';
 
 export default function DashboardScreen() {
     return (
@@ -44,9 +46,16 @@ export default function DashboardScreen() {
                                     >
                                         Expenses
                                     </Text>
-                                    <Text isNumeric variant='headline'>
-                                        $3,000.00
-                                    </Text>
+                                    <View className='flex-row flex-1 gap-2 items-center'>
+                                        <Text isNumeric variant='headline'>
+                                            $3,000.00
+                                        </Text>
+                                        <IconSymbol
+                                            name='arrow.up.right.circle.fill'
+                                            size={16}
+                                            color={colors['system-orange']}
+                                        />
+                                    </View>
                                 </View>
                             </View>
                         </View>

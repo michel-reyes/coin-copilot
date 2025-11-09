@@ -7,6 +7,8 @@ const useTransactions = () => {
     const startDate = LAST_5_MONTHS_START;
     const endDate = CURRENT_MONTH_END;
 
+    console.log({ startDate, endDate });
+
     const { data, isLoading, isError } = useGetTransactions({
         start: startDate,
         end: endDate,
