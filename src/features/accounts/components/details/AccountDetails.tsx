@@ -5,6 +5,7 @@ import TransactionItem from '@/features/transactions/components/commons/Transact
 import TransactionsSortFilter from '@/features/transactions/components/commons/transactionsSortAndFilter';
 import useTransactionsSortAndFilter from '@/features/transactions/hooks/useTransactionsSortAndFilter';
 import { getTransactionDateRange } from '@/features/transactions/utils/transactions-helper';
+import { formatDate } from '@/utils/date-utils';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AccountCard, { type AccountCardProps } from './AccountCard';
@@ -47,12 +48,17 @@ export default function AccountDetails({
 
     const showFilter = paginatedTransactions.length > 0;
     const { start, end } = getTransactionDateRange(transactions);
+    const dateRange = `${formatDate(start, 'MMM')} - ${formatDate(end, 'MMM YYYY')}`;
     const filterTitle = (
         <View className='gap-1'>
-            <Text variant='subhead' color='tertiaryLabel'>
-                {start}-{end}
-            </Text>
             <Text variant='title3'>Latest Transactions</Text>
+            <Text
+                variant='subhead'
+                color='tertiaryLabel'
+                className='font-semibold'
+            >
+                {dateRange}
+            </Text>
         </View>
     );
 

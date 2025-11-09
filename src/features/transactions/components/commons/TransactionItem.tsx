@@ -2,7 +2,7 @@ import { Transaction } from '@/api/types/apiTypes';
 import { ListItem, Text, View } from '@/components/commons';
 import { IconSymbol } from '@/components/os/IconSymbol';
 import colors from '@/themes/colors';
-import { formatDate, getDayName, getMonthName } from '@/utils/date-utils';
+import { formatDate } from '@/utils/date-utils';
 import { formatCurrency } from '@/utils/number-formatter';
 import { TransactionLogo } from './TransactionLogo';
 // ------------------------------------------------------------------
@@ -91,13 +91,7 @@ export default function TransactionItem({
     const category = transaction.category_name || 'Uncategorized';
     const symbol = transaction.is_income ? '+ ' : '';
     const amount = symbol + formatCurrency(transaction.to_base, true, false);
-    const monthDay =
-        getDayName(transaction.date, 'short').dayName +
-        ', ' +
-        formatDate(transaction.date, 'DD') +
-        ' ' +
-        getMonthName(transaction.date, 'short');
-    const year = formatDate(transaction.date, 'YYYY');
+    const fullDate = formatDate(transaction.date, 'ddd, DD MMM YYYY');
 
     return (
         <View>
@@ -114,7 +108,7 @@ export default function TransactionItem({
                         color='secondaryLabel'
                         className='flex-1 font-bold'
                     >
-                        {`${monthDay} ${year}`}
+                        {fullDate}
                     </Text>
                 }
                 hint={<TransactionType transaction={transaction} />}
