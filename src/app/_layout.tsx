@@ -7,17 +7,20 @@ import { SessionProvider, useSession } from '@/context/authContext';
 import { NotificationProvider } from '@/context/notificationContext';
 import SplashScreenController from '@/splash';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SessionProvider>
-        <NotificationProvider>
-          <SplashScreenController />
-          <RootNavigator />
-        </NotificationProvider>
-      </SessionProvider>
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>
+          <NotificationProvider>
+            <SplashScreenController />
+            <RootNavigator />
+          </NotificationProvider>
+        </SessionProvider>
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }
 

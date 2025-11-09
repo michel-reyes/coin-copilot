@@ -1,6 +1,6 @@
 import { AccountSettings } from '@/api/types/apiTypes';
 import { type ThemedTextProps } from '@/components/commons/Text';
-import { LAST_15_DAYS, NOW, TODAY_DAY, getMonthName } from '@/utils/date-utils';
+import { LAST_15_DAYS, NOW, TODAY_DAY, formatDate } from '@/utils/date-utils';
 import { formatCurrency, formatShortCurrency } from '@/utils/number-formatter';
 import dayjs from 'dayjs';
 
@@ -92,7 +92,7 @@ export function checkAccountDueDay(dueDay = 0) {
     const isToday = (date: any) => date.isSame(dayjs(), 'day');
     const isTomorrow = (date: any) => date.isSame(dayjs().add(1, 'day'), 'day');
     const dueMonthDay = dueDay
-        ? getMonthName(NOW.format('YYYY-MM-DD'), 'short') + ' ' + String(dueDay)
+        ? formatDate(NOW, 'MMM') + ' ' + String(dueDay)
         : '';
 
     let dueDayAtMessage = '';
@@ -125,9 +125,6 @@ export function checkAccountDueDay(dueDay = 0) {
             dueWarningColor = 'label';
         } else if (daysDifference >= 9 && daysDifference <= 13) {
             // Corresponds to "more than 8 days and less than 14 days"
-            // dueDayAtMessage = `${getMonthName(
-            //     calculatedFullDueDay.format('YYYY-MM-DD')
-            // )} ${calculatedFullDueDay.format('DD')}`;
             dueDayAtMessage = `in ${daysDifference} days`;
             dueWarningColor = 'tertiaryLabel';
         } else {
