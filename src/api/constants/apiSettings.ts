@@ -7,43 +7,43 @@ export const PRISMA_BASE_URL = 'https://coin-copilot-m.expo.app';
 // --------------------------------------------
 
 export const LUNCH_MONEY_ENDPOINTS = {
-    ASSETS: '/assets',
-    BUDGETS: '/budgets',
-    CATEGORIES: '/categories',
-    PLAID_ACCOUNTS: '/plaid_accounts',
-    RECURRING_ITEMS: '/recurring_items',
-    TRANSACTIONS: '/transactions',
+  ASSETS: '/assets',
+  BUDGETS: '/budgets',
+  CATEGORIES: '/categories',
+  PLAID_ACCOUNTS: '/plaid_accounts',
+  RECURRING_ITEMS: '/recurring_items',
+  TRANSACTIONS: '/transactions',
 };
 
 // --------------------------------------------
 
 export const LUNCH_MONEY_KEYS = {
-    assets: 'assets',
-    budget: 'budget',
-    categories: 'categories',
-    plaid: 'plaid',
-    recurringItems: 'recurringItems',
-    transactions: 'transactions',
+  assets: 'assets',
+  budget: 'budget',
+  categories: 'categories',
+  plaid: 'plaid',
+  recurringItems: 'recurringItems',
+  transactions: 'transactions',
 };
 
 // --------------------------------------------
 
 export const PRISMA_ENDPOINTS = {
-    ACCOUNT_SETTINGS: 'account-settings',
-    TRANSACTIONS_ANOMALY: 'transactions-anomaly',
-    APP_SETTINGS: 'app-settings',
-    MESSAGE_ALERTS: 'message-alerts',
+  ACCOUNT_SETTINGS: 'account-settings',
+  TRANSACTIONS_ANOMALY: 'transactions-anomaly',
+  APP_SETTINGS: 'app-settings',
+  MESSAGE_ALERTS: 'message-alerts',
 };
 
 // --------------------------------------------
 
 export const SUPABASE_KEYS = {
-    accountSettings: 'accountSettings',
-    transactionsAnomaly: 'transactionsAnomaly',
-    appSettings: 'appSettings',
-    messageAlerts: 'messageAlerts',
+  accountSettings: 'accountSettings',
+  transactionsAnomaly: 'transactionsAnomaly',
+  appSettings: 'appSettings',
+  messageAlerts: 'messageAlerts',
 
-    PRISMA_PARAMS: {
-        markAllRead: 'mark-all-read',
-    },
+  PRISMA_PARAMS: {
+    markAllRead: 'mark-all-read',
+  },
 };

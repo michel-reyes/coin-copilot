@@ -15,7 +15,7 @@ export default function PeriodSummary() {
   if (isTransactionLoading) return <Text>Loading...</Text>;
   if (isTransactionError) return <Text>Error loading accounts</Text>;
   if (transactions.length === 0) {
-    return <Text>No accounts found</Text>;
+    return <Text>No transactions found</Text>;
   }
 
   return <PeriodSummaryCashFlow transactions={transactions} />;

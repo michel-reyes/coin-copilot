@@ -54,7 +54,7 @@ export function getTransactionDateRange(data?: Transaction[]) {
  * @param filter The filter criteria.
  * @returns True if the value matches the filter, false otherwise.
  */
-function matchesFilter<T>(
+export function matchesFilter<T>(
   value: T | undefined | null,
   filter: FilterValue<T>
 ): boolean {
@@ -154,8 +154,6 @@ export function filterTransactions(
         return true;
       }
 
-      // Use the helper for other types and operator objects
-      // Need type assertion as TS struggles matching key to Transaction[key] type here
       return matchesFilter(
         transaction[key as keyof Transaction],
         filterValue as FilterValue<any>

@@ -22,7 +22,6 @@ export default function PeriodSummaryCashFlow({
 
   return (
     <View className='flex-1'>
-      {/* title */}
       <View className='mb-3'>
         <Text variant='title3' className='mx-3'>
           Period
