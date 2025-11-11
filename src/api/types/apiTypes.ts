@@ -62,9 +62,7 @@ export interface RecurringItem {
 }
 
 /**
- * Account items API
- * Plaid API
- * Assets API
+ * Assets API (accounts like credit cards, savings, etc.)
  */
 
 export interface AssetsItem {
@@ -82,6 +80,9 @@ export interface AssetsItem {
     created_at: string;
 }
 
+/**
+ * Plaid API (accounts like bank accounts, investment accounts, etc.)
+ */
 export interface PlaidItem {
     id: number;
     display_name: string;

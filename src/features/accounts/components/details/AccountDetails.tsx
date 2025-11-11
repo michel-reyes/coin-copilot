@@ -46,7 +46,7 @@ export default function AccountDetails({
         enableIndexing: true, // Use the optimized indexing approach
     });
 
-    const showFilter = paginatedTransactions.length > 0;
+    const showFilter = true; // paginatedTransactions.length > 0;
     const { start, end } = getTransactionDateRange(transactions);
     const dateRange = `${formatDate(start, 'MMM')} - ${formatDate(end, 'MMM YYYY')}`;
     const filterTitle = (

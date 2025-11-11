@@ -17,7 +17,7 @@ export interface NormalizedAccount {
     status: string;
     isClosed: boolean;
     lastUpdate: string;
-    limit: number | null; // Can be null when no limit exists
+    limit: number | null;
 }
 
 export interface AccountsQueryResult {
