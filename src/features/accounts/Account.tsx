@@ -24,7 +24,7 @@ export default function Account({ account }: { account: NormalizedAccount }) {
 
     return (
         <AccountDetails
-            isError={isErrorAccountSetting || isErrorTransactions}
+            isError={isErrorTransactions}
             isLoading={isLoadingAccountSetting || isLoadingTransactions}
             account={account}
             details={accountDetails}

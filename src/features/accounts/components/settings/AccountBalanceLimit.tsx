@@ -113,14 +113,14 @@ export default function AccountBalanceLimit({
         );
     }
 
-    if (isError) {
-        return (
-            <View className='p-4 border mb-4'>
-                <Text className='mb-5'>Balance Limit</Text>
-                <Text>Error loading account settings</Text>
-            </View>
-        );
-    }
+    // if (isError) {
+    //     return (
+    //         <View className='p-4 border mb-4'>
+    //             <Text className='mb-5'>Balance Limit</Text>
+    //             <Text>Error loading account settings</Text>
+    //         </View>
+    //     );
+    // }
 
     // -------------------------------------------------------------------
 
