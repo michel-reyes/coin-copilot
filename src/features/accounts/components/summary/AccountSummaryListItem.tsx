@@ -42,9 +42,9 @@ export default function AccountSummaryListItem({
         return <Text>Loading...</Text>;
     }
 
-    if (isError) {
-        return <Text>Error loading account settings</Text>;
-    }
+    // if (isError) {
+    //     return <Text>Error loading account settings</Text>;
+    // }
 
     return (
         <>

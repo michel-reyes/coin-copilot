@@ -122,6 +122,33 @@ export async function getEventById(
     };
 }
 
+function detectUserTimezone() {
+    try {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch (error) {
+        console.error('Failed to detect timezone:', error);
+        return 'UTC'; // fallback
+    }
+}
+
+function extractWallClockTime(date: any, timezone: any) {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: timezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    });
+
+    const parts = formatter.formatToParts(date);
+    const hourPart = parts.find((p) => p.type === 'hour');
+    const minutePart = parts.find((p) => p.type === 'minute');
+
+    const hour = hourPart?.value || '00';
+    const minute = minutePart?.value || '00';
+
+    return `${hour}:${minute}`;
+}
+
 /**
  * Create a new event with optional notification schedules
  */
@@ -143,11 +170,29 @@ export async function createEvent(
     }
 
     // Create the event
+    // const { data: event, error: eventError } = await supabase
+    //     .from('events')
+    //     .insert({
+    //         user_id: user.id,
+    //         ...eventData,
+    //         is_active: true,
+    //     })
+    //     .select()
+    //     .single();
+
+    const due_at = new Date(Date.now() + 60000);
+    const timezone = detectUserTimezone();
+
     const { data: event, error: eventError } = await supabase
-        .from('events')
+        .from('reminders')
         .insert({
             user_id: user.id,
-            ...eventData,
+            title: 'Test Reminder',
+            body: 'Test Body',
+            due_at: due_at, // 1 minute from now
+            notify_before: 0,
+            timezone: timezone,
+            wall_clock_time: extractWallClockTime(due_at, timezone),
             is_active: true,
         })
         .select()

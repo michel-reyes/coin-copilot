@@ -67,7 +67,9 @@ const HeadsUpAlertMessage = ({
                     </Text>
                 </View>
             ) : (
-                !isIncome && ( // Check for account status again
+                !isIncome &&
+                dueMonthDay && (
+                    // Check for account status again
                     <View className='flex-1 flex-row items-center justify-between'>
                         <Text
                             variant='footnote'

@@ -67,14 +67,14 @@ export default function AccountDueDay({
         );
     }
 
-    if (isError) {
-        return (
-            <View className='p-4 border mb-4'>
-                <Text className='mb-5'>Due Day</Text>
-                <Text>Error loading account settings</Text>
-            </View>
-        );
-    }
+    // if (isError) {
+    //     return (
+    //         <View className='p-4 border mb-4'>
+    //             <Text className='mb-5'>Due Day</Text>
+    //             <Text>Error loading account settings</Text>
+    //         </View>
+    //     );
+    // }
 
     // -------------------------------------------------------------------
 
