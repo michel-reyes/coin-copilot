@@ -5,7 +5,7 @@ import {
     deleteEventByAccount,
     updateOrCreateCreditCardEvent,
 } from '@/lib/eventsApi';
-import { useGlobalSearchParams, useNavigation } from 'expo-router';
+import { useGlobalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable } from 'react-native';
 import AccountBalanceLimit from './AccountBalanceLimit';
@@ -19,7 +19,7 @@ export default function AccountSettings() {
 
     const upsertMutation = useUpsertAccountSettings();
     const { getAccountById } = useAccounts();
-    const rootLayout = useNavigation('/(private)/accounts');
+    const router = useRouter();
 
     const { id } = useGlobalSearchParams<{ id: string }>();
     const account = getAccountById(id);
@@ -62,7 +62,7 @@ export default function AccountSettings() {
         }
 
         // dismiss account settings modal
-        rootLayout.goBack();
+        router.back();
     };
 
     return (
@@ -79,9 +79,7 @@ export default function AccountSettings() {
                     onPress={handleSaveAccountSettings}
                     className='self-start'
                 >
-                    <Text variant='body' color='link'>
-                        Save
-                    </Text>
+                    <Text variant='body'>Save</Text>
                 </Pressable>
             </View>
             <AccountBalanceLimit

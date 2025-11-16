@@ -11,6 +11,26 @@ export default function AppLayout() {
             }}
         >
             <Stack.Screen name='index' />
+            <Stack.Screen
+                name='accounts/[id]'
+                options={{
+                    headerShown: true,
+                    headerBackButtonDisplayMode: 'minimal',
+                    contentStyle: {
+                        backgroundColor: colors['system-background'],
+                    },
+                    headerStyle: {
+                        backgroundColor: colors['system-background'],
+                    },
+                }}
+            />
+            <Stack.Screen
+                name='accounts/account-settings'
+                options={{
+                    presentation: 'modal',
+                    headerShown: false,
+                }}
+            />
         </Stack>
     );
 }
