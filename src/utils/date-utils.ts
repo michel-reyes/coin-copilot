@@ -83,3 +83,30 @@ export function prevMonth(prev: string, format = 'YYYY-MM-DD') {
     const end = newDate.endOf('month').format(format);
     return { start, end };
 }
+
+export function detectUserTimezone() {
+    try {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch (error) {
+        console.error('Failed to detect timezone:', error);
+        return 'UTC'; // fallback
+    }
+}
+
+export function extractWallClockTime(date: any, timezone: any) {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: timezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    });
+
+    const parts = formatter.formatToParts(date);
+    const hourPart = parts.find((p) => p.type === 'hour');
+    const minutePart = parts.find((p) => p.type === 'minute');
+
+    const hour = hourPart?.value || '00';
+    const minute = minutePart?.value || '00';
+
+    return `${hour}:${minute}`;
+}

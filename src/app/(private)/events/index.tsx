@@ -1,6 +1,6 @@
 import { useSession } from '@/context/authContext';
 import { useNotifications } from '@/hooks/useNotifications';
-import { type Event } from '@/lib/eventsApi';
+import { type Reminder } from '@/lib/eventsApi';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -16,7 +16,7 @@ export default function EventsListScreen() {
     const router = useRouter();
     const { expoPushToken } = useNotifications();
     const { signOut } = useSession();
-    const [events, setEvents] = useState<Event[]>([]);
+    const [events, setEvents] = useState<Reminder[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);

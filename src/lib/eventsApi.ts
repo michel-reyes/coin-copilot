@@ -4,22 +4,24 @@
  * Client-side utilities for managing recurring events and notification schedules
  */
 
+import { detectUserTimezone, extractWallClockTime } from '@/utils/date-utils';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import { daysBeforeToMilliseconds } from './notificationSchedules';
 import { supabase } from './supabase';
 
 // Configure dayjs with timezone support
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export type EventType = 'bill' | 'credit_card' | 'budget_review';
+export type ReminderType = 'bill' | 'credit_card' | 'budget_review';
 export type RecurrenceType = 'monthly' | 'weekly' | 'custom' | 'one_time';
 
-export interface Event {
+export interface Reminder {
     id: string;
     user_id: string;
-    event_type: EventType;
+    reminder_type: ReminderType;
     title: string;
     description?: string;
     due_date: string; // ISO date string (YYYY-MM-DD)
@@ -27,7 +29,6 @@ export interface Event {
     recurrence_interval?: number; // For custom recurrence
     is_active: boolean;
     account_id?: string; // Optional link to Lunch Money account
-    institution_name?: string; // Optional institution name for account identification
     created_at: string;
     updated_at: string;
 }
@@ -41,19 +42,35 @@ export interface NotificationSchedule {
     created_at: string;
 }
 
-export interface EventWithSchedules extends Event {
+export interface ReminderWithSchedules extends Reminder {
     notification_schedules: NotificationSchedule[];
 }
 
-export interface CreateEventData {
-    event_type: EventType;
+/**
+ * * id uuid not null default gen_random_uuid (),
+  user_id uuid not null,
+  title text not null,
+  body text not null,
+  due_at timestamp with time zone not null,
+  notify_before integer not null default 0,
+  notify_before_schedules jsonb default '[]'::jsonb,
+  timezone text not null,
+  wall_clock_time time without time zone not null,
+  is_active boolean not null default true,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+ */
+export interface CreateReminderData {
+    user_id?: string;
     title: string;
-    description?: string;
-    due_date: string; // YYYY-MM-DD
-    recurrence_type: RecurrenceType;
-    recurrence_interval?: number;
+    body: string;
+    due_at: string;
+    notify_before?: number; // Legacy single notification support
+    notify_before_schedules?: number[]; // Array of days_before (e.g., [7, 3, 0])
+    timezone?: string;
+    wall_clock_time?: string;
+    is_active: boolean;
     account_id?: string;
-    institution_name?: string;
 }
 
 export interface CreateNotificationScheduleData {
@@ -62,16 +79,16 @@ export interface CreateNotificationScheduleData {
 }
 
 /**
- * Fetch all events for the current user
+ * Fetch all reminders for the current user
  */
-export async function getEvents(options?: {
+export async function getReminders(options?: {
     includeInactive?: boolean;
-    eventType?: EventType;
-}): Promise<{ data: Event[] | null; error: any }> {
+    eventType?: ReminderType;
+}): Promise<{ data: Reminder[] | null; error: any }> {
     let query = supabase
-        .from('events')
+        .from('reminders')
         .select('*')
-        .order('due_date', { ascending: true });
+        .order('due_at', { ascending: true });
 
     if (!options?.includeInactive) {
         query = query.eq('is_active', true);
@@ -85,77 +102,12 @@ export async function getEvents(options?: {
 }
 
 /**
- * Fetch a single event by ID with its notification schedules
- */
-export async function getEventById(
-    eventId: string
-): Promise<{ data: EventWithSchedules | null; error: any }> {
-    const { data: event, error: eventError } = await supabase
-        .from('events')
-        .select(
-            `
-      *,
-      event_notification_schedules(*)
-    `
-        )
-        .eq('id', eventId)
-        .eq('event_notification_schedules.is_active', true)
-        .order('days_before', {
-            ascending: false,
-            referencedTable: 'event_notification_schedules',
-        })
-        .single();
-
-    if (eventError || !event) {
-        return { data: null, error: eventError };
-    }
-
-    const eventData = event as any;
-
-    return {
-        data: {
-            ...eventData,
-            notification_schedules:
-                eventData.event_notification_schedules || [],
-        },
-        error: null,
-    };
-}
-
-function detectUserTimezone() {
-    try {
-        return Intl.DateTimeFormat().resolvedOptions().timeZone;
-    } catch (error) {
-        console.error('Failed to detect timezone:', error);
-        return 'UTC'; // fallback
-    }
-}
-
-function extractWallClockTime(date: any, timezone: any) {
-    const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: timezone,
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-    });
-
-    const parts = formatter.formatToParts(date);
-    const hourPart = parts.find((p) => p.type === 'hour');
-    const minutePart = parts.find((p) => p.type === 'minute');
-
-    const hour = hourPart?.value || '00';
-    const minute = minutePart?.value || '00';
-
-    return `${hour}:${minute}`;
-}
-
-/**
  * Create a new event with optional notification schedules
+ 
  */
-export async function createEvent(
-    eventData: CreateEventData,
-    notificationSchedules?: CreateNotificationScheduleData[]
-): Promise<{ data: EventWithSchedules | null; error: any }> {
+export async function createReminder(
+    reminderData: CreateReminderData
+): Promise<{ data: Reminder | null; error: any }> {
     // Get current user
     const {
         data: { user },
@@ -169,85 +121,85 @@ export async function createEvent(
         };
     }
 
-    // Create the event
-    // const { data: event, error: eventError } = await supabase
-    //     .from('events')
-    //     .insert({
-    //         user_id: user.id,
-    //         ...eventData,
-    //         is_active: true,
-    //     })
-    //     .select()
-    //     .single();
-
-    const due_at = new Date(Date.now() + 60000);
+    // Create the reminder
     const timezone = detectUserTimezone();
 
-    const { data: event, error: eventError } = await supabase
+    // Parse the due_date string (YYYY-MM-DD) and create a date object
+    const dueDate = new Date(reminderData.due_at + 'T00:00:00');
+    const wallClockTime = extractWallClockTime(dueDate, timezone);
+
+    // Build the insert object
+    const reminderDataToInsert: any = {
+        user_id: user.id,
+        title: reminderData.title,
+        body: reminderData.body || '',
+        due_at: dueDate.toISOString(),
+        timezone,
+        wall_clock_time: wallClockTime,
+        is_active: reminderData.is_active,
+        ...(reminderData.account_id && { account_id: reminderData.account_id }),
+    };
+
+    // Handle notification schedules - prefer new array format over legacy single value
+    if (
+        reminderData.notify_before_schedules &&
+        reminderData.notify_before_schedules.length > 0
+    ) {
+        // Convert days_before array to milliseconds array for JSONB storage
+        // e.g., [7, 3, 0] -> [604800000, 259200000, 0]
+        const schedulesInMs = reminderData.notify_before_schedules.map(
+            daysBeforeToMilliseconds
+        );
+        reminderDataToInsert.notify_before_schedules = schedulesInMs;
+    } else if (reminderData.notify_before !== undefined) {
+        // Legacy support: single notify_before value
+        reminderDataToInsert.notify_before = reminderData.notify_before;
+    }
+
+    const { data: reminder, error: reminderError } = await supabase
         .from('reminders')
-        .insert({
-            user_id: user.id,
-            title: 'Test Reminder',
-            body: 'Test Body',
-            due_at: due_at, // 1 minute from now
-            notify_before: 0,
-            timezone: timezone,
-            wall_clock_time: extractWallClockTime(due_at, timezone),
-            is_active: true,
-        })
+        .insert(reminderDataToInsert)
         .select()
         .single();
 
-    if (eventError || !event) {
-        return { data: null, error: eventError };
+    if (reminderError || !reminder) {
+        return { data: null, error: reminderError };
     }
 
-    // Create notification schedules if provided
-    let schedules: NotificationSchedule[] = [];
-
-    if (notificationSchedules && notificationSchedules.length > 0) {
-        const { data: createdSchedules, error: schedulesError } = await supabase
-            .from('event_notification_schedules')
-            .insert(
-                notificationSchedules.map((schedule) => ({
-                    event_id: event.id,
-                    ...schedule,
-                    is_active: true,
-                }))
-            )
-            .select();
-
-        if (schedulesError) {
-            // Event was created but schedules failed - still return the event
-            console.error(
-                'Error creating notification schedules:',
-                schedulesError
-            );
-        } else {
-            schedules = createdSchedules || [];
-        }
-    }
-
+    // Database trigger will automatically create notification entries
     return {
-        data: {
-            ...event,
-            notification_schedules: schedules,
-        },
+        data: reminder,
         error: null,
     };
 }
 
 /**
- * Update an existing event
+ * Update an existing reminder
  */
-export async function updateEvent(
-    eventId: string,
-    updates: Partial<CreateEventData>
-): Promise<{ data: Event | null; error: any }> {
+export async function updateReminder(
+    reminderId: string,
+    updates: Partial<CreateReminderData>
+): Promise<{ data: Reminder | null; error: any }> {
+    const timezone = detectUserTimezone();
+
+    // Convert updates to reminders table format
+    const reminderUpdates: any = {};
+
+    if (updates.title) reminderUpdates.title = updates.title;
+    if (updates.body) reminderUpdates.body = updates.body;
+    if (updates.due_at) {
+        const dueDate = new Date(updates.due_at + 'T00:00:00');
+        reminderUpdates.due_at = dueDate.toISOString();
+        reminderUpdates.wall_clock_time = extractWallClockTime(
+            dueDate,
+            timezone
+        );
+    }
+
     const { data, error } = await supabase
-        .from('events')
-        .update(updates)
-        .eq('id', eventId)
+        .from('reminders')
+        .update(reminderUpdates)
+        .eq('id', reminderId)
         .select()
         .single();
 
@@ -255,15 +207,15 @@ export async function updateEvent(
 }
 
 /**
- * Delete an event (soft delete - set is_active to false)
+ * Delete a reminder (soft delete - set is_active to false)
  */
-export async function deleteEvent(
-    eventId: string
-): Promise<{ data: Event | null; error: any }> {
+export async function deleteReminder(
+    reminderId: string
+): Promise<{ data: Reminder | null; error: any }> {
     const { data, error } = await supabase
-        .from('events')
+        .from('reminders')
         .update({ is_active: false })
-        .eq('id', eventId)
+        .eq('id', reminderId)
         .select()
         .single();
 
@@ -271,242 +223,46 @@ export async function deleteEvent(
 }
 
 /**
- * Permanently delete an event (hard delete)
+ * Permanently delete a reminder (hard delete)
  */
-export async function permanentlyDeleteEvent(
-    eventId: string
-): Promise<{ error: any }> {
-    const { error } = await supabase.from('events').delete().eq('id', eventId);
-
-    return { error };
-}
-
-/**
- * Add a notification schedule to an event
- */
-export async function addNotificationSchedule(
-    eventId: string,
-    schedule: CreateNotificationScheduleData
-): Promise<{ data: NotificationSchedule | null; error: any }> {
-    const { data, error } = await supabase
-        .from('event_notification_schedules')
-        .insert({
-            event_id: eventId,
-            ...schedule,
-            is_active: true,
-        })
-        .select()
-        .single();
-
-    return { data, error };
-}
-
-/**
- * Update a notification schedule
- */
-export async function updateNotificationSchedule(
-    scheduleId: string,
-    updates: Partial<CreateNotificationScheduleData>
-): Promise<{ data: NotificationSchedule | null; error: any }> {
-    const { data, error } = await supabase
-        .from('event_notification_schedules')
-        .update(updates)
-        .eq('id', scheduleId)
-        .select()
-        .single();
-
-    return { data, error };
-}
-
-/**
- * Remove a notification schedule (soft delete)
- */
-export async function removeNotificationSchedule(
-    scheduleId: string
-): Promise<{ data: NotificationSchedule | null; error: any }> {
-    const { data, error } = await supabase
-        .from('event_notification_schedules')
-        .update({ is_active: false })
-        .eq('id', scheduleId)
-        .select()
-        .single();
-
-    return { data, error };
-}
-
-/**
- * Permanently delete a notification schedule
- */
-export async function permanentlyDeleteNotificationSchedule(
-    scheduleId: string
+export async function permanentlyDeleteReminder(
+    reminderId: string
 ): Promise<{ error: any }> {
     const { error } = await supabase
-        .from('event_notification_schedules')
+        .from('reminders')
         .delete()
-        .eq('id', scheduleId);
+        .eq('id', reminderId);
 
     return { error };
 }
 
 /**
- * Get notification queue/history for debugging
+ * Get reminder by account ID
+ * Note: Assumes reminders table has account_id column
  */
-export async function getNotificationHistory(options?: {
-    eventId?: string;
-    limit?: number;
-}): Promise<{ data: any[] | null; error: any }> {
-    let query = supabase
-        .from('notification_queue')
-        .select(
-            `
-      *,
-      events (
-        title,
-        event_type
-      )
-    `
-        )
-        .order('created_at', { ascending: false });
-
-    if (options?.eventId) {
-        query = query.eq('event_id', options.eventId);
-    }
-
-    if (options?.limit) {
-        query = query.limit(options.limit);
-    }
-
-    return await query;
-}
-
-/**
- * Get event by account ID and institution name
- */
-export async function getEventByAccount(
-    accountId: string,
-    institutionName: string
-): Promise<{ data: EventWithSchedules | null; error: any }> {
-    const { data: events, error: eventError } = await supabase
-        .from('events')
-        .select(
-            `
-      *,
-      event_notification_schedules(*)
-    `
-        )
+export async function getReminderByAccount(
+    accountId: string
+): Promise<{ data: ReminderWithSchedules | null; error: any }> {
+    const { data: reminders, error: eventError } = await supabase
+        .from('reminders')
+        .select('*')
         .eq('account_id', accountId)
-        .eq('institution_name', institutionName)
         .eq('is_active', true)
-        .eq('event_notification_schedules.is_active', true)
-        .order('days_before', {
-            ascending: false,
-            referencedTable: 'event_notification_schedules',
-        })
         .limit(1);
 
-    if (eventError || !events || events.length === 0) {
+    if (eventError || !reminders || reminders.length === 0) {
         return { data: null, error: eventError };
     }
 
-    const event = events[0] as any;
+    const reminder = reminders[0] as any;
 
     return {
         data: {
-            ...event,
-            notification_schedules: event.event_notification_schedules || [],
+            ...reminder,
+            notification_schedules: [], // Reminders table stores notify_before directly
         },
         error: null,
     };
-}
-
-/**
- * Update or create a credit card event for an account
- */
-export async function updateOrCreateCreditCardEvent(
-    accountId: string,
-    institutionName: string,
-    accountDisplayName: string,
-    dueDay: number
-): Promise<{ data: EventWithSchedules | null; error: any }> {
-    // Calculate due date: current year/month with the specified day
-    // Use dayjs to avoid timezone issues
-    const now = dayjs();
-    const dueDate = now.date(dueDay);
-    const dueDateString = dueDate.format('YYYY-MM-DD');
-
-    const eventData: CreateEventData = {
-        event_type: 'credit_card',
-        title: `${accountDisplayName}`,
-        description: `${accountDisplayName} Payment Due`,
-        due_date: dueDateString,
-        recurrence_type: 'monthly',
-        account_id: accountId,
-        institution_name: institutionName,
-    };
-
-    const notificationSchedules: CreateNotificationScheduleData[] = [
-        { days_before: 7, notification_time: '09:00:00' },
-        { days_before: 0, notification_time: '08:00:00' },
-    ];
-
-    // Check if event already exists
-    const { data: existingEvent } = await getEventByAccount(
-        accountId,
-        institutionName
-    );
-
-    if (existingEvent) {
-        // Update existing event
-        const { data: updatedEvent, error: updateError } = await updateEvent(
-            existingEvent.id,
-            {
-                title: eventData.title,
-                due_date: eventData.due_date,
-                recurrence_type: eventData.recurrence_type,
-            }
-        );
-
-        if (updateError || !updatedEvent) {
-            return { data: null, error: updateError };
-        }
-
-        // Return updated event with existing schedules (schedules unchanged)
-        return {
-            data: {
-                ...updatedEvent,
-                notification_schedules: existingEvent.notification_schedules,
-            },
-            error: null,
-        };
-    } else {
-        // Create new event
-        return await createEvent(eventData, notificationSchedules);
-    }
-}
-
-/**
- * Delete event by account ID and institution name (soft delete)
- */
-export async function deleteEventByAccount(
-    accountId: string,
-    institutionName: string
-): Promise<{ data: Event | null; error: any }> {
-    // Directly update to soft-delete in single query
-    const { data, error } = await supabase
-        .from('events')
-        .update({ is_active: false })
-        .eq('account_id', accountId)
-        .eq('institution_name', institutionName)
-        .eq('is_active', true) // Only delete if currently active
-        .select()
-        .single();
-
-    // If no rows affected, return null (event doesn't exist or already deleted)
-    if (error?.code === 'PGRST116') {
-        return { data: null, error: null };
-    }
-
-    return { data, error };
 }
 
 /**
@@ -540,7 +296,7 @@ export function parseTimeString(timeString: string): {
 /**
  * Get a human-readable recurrence description
  */
-export function getRecurrenceDescription(event: Event): string {
+export function getRecurrenceDescription(event: Reminder): string {
     switch (event.recurrence_type) {
         case 'one_time':
             return 'One time';

@@ -1,10 +1,10 @@
 import {
-    createEvent,
+    createReminder,
     formatDateForDB,
     formatTimeForDB,
     type CreateNotificationScheduleData,
-    type EventType,
     type RecurrenceType,
+    type ReminderType,
 } from '@/lib/eventsApi';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
@@ -25,7 +25,7 @@ export default function CreateEventScreen() {
     const router = useRouter();
 
     // Event fields
-    const [eventType, setEventType] = useState<EventType>('bill');
+    const [eventType, setEventType] = useState<ReminderType>('bill');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState(new Date());
@@ -66,7 +66,7 @@ export default function CreateEventScreen() {
                     notification_time: formatTimeForDB(schedule.time),
                 }));
 
-            const { data, error } = await createEvent(
+            const { data, error } = await createReminder(
                 {
                     event_type: eventType,
                     title: title.trim(),
@@ -154,7 +154,7 @@ export default function CreateEventScreen() {
                                 'bill',
                                 'credit_card',
                                 'budget_review',
-                            ] as EventType[]
+                            ] as ReminderType[]
                         ).map((type) => (
                             <TouchableOpacity
                                 key={type}
