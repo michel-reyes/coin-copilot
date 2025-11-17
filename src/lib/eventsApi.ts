@@ -16,7 +16,13 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export type ReminderType = 'bill' | 'credit_card' | 'budget_review';
-export type RecurrenceType = 'monthly' | 'weekly' | 'custom' | 'one_time';
+export type RecurrenceType =
+    | 'one_time'
+    | 'daily'
+    | 'weekly'
+    | 'bi_weekly'
+    | 'monthly'
+    | 'custom';
 
 export interface Reminder {
     id: string;
@@ -71,6 +77,10 @@ export interface CreateReminderData {
     wall_clock_time?: string;
     is_active: boolean;
     account_id?: string;
+    recurrence_type?: RecurrenceType; // Type of recurrence (daily, weekly, monthly, etc.)
+    recurrence_interval?: number; // For custom recurrence (number of days)
+    recurrence_end_date?: string; // Optional date to stop recurring (YYYY-MM-DD)
+    notification_times?: string[]; // Array of times for same-day notifications (e.g., ['09:00', '13:00', '17:00'])
 }
 
 export interface CreateNotificationScheduleData {
@@ -154,6 +164,26 @@ export async function createReminder(
     } else if (reminderData.notify_before !== undefined) {
         // Legacy support: single notify_before value
         reminderDataToInsert.notify_before = reminderData.notify_before;
+    }
+
+    // Handle recurrence settings
+    if (reminderData.recurrence_type) {
+        reminderDataToInsert.recurrence_type = reminderData.recurrence_type;
+    }
+    if (reminderData.recurrence_interval) {
+        reminderDataToInsert.recurrence_interval =
+            reminderData.recurrence_interval;
+    }
+    if (reminderData.recurrence_end_date) {
+        reminderDataToInsert.recurrence_end_date =
+            reminderData.recurrence_end_date;
+    }
+    if (
+        reminderData.notification_times &&
+        reminderData.notification_times.length > 0
+    ) {
+        reminderDataToInsert.notification_times =
+            reminderData.notification_times;
     }
 
     const { data: reminder, error: reminderError } = await supabase

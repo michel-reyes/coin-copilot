@@ -2,15 +2,25 @@
  * Notification Schedules Configuration
  *
  * Developer-configurable notification schedules per reminder type.
- * Each reminder type can have multiple notification offsets (in days before due date).
+ * Each reminder type can have multiple notification offsets (in days before due date)
+ * and multiple notification times per day.
  */
 
 export interface NotificationScheduleConfig {
     days_before: number;
     label: string;
+    times?: string[]; // Optional: specific times for notifications (e.g., ['09:00', '13:00', '17:00'])
 }
 
 export type ReminderTypeKey = 'credit_card' | 'bill' | 'budget_review';
+
+export type RecurrenceType =
+    | 'one_time'
+    | 'daily'
+    | 'weekly'
+    | 'bi_weekly'
+    | 'monthly'
+    | 'custom';
 
 /**
  * Default notification schedules for each reminder type.
@@ -20,21 +30,43 @@ export type ReminderTypeKey = 'credit_card' | 'bill' | 'budget_review';
  *              - 0 = day of the due date
  *              - 1 = 1 day before
  *              - 7 = 1 week before
+ * times: Optional array of specific times to send notifications (24-hour format)
+ *        - If omitted, uses default time from wall_clock_time
+ *        - Example: ['09:00', '13:00', '17:00'] sends 3 notifications at 9 AM, 1 PM, and 5 PM
  */
 export const NOTIFICATION_SCHEDULES: Record<
     ReminderTypeKey,
     NotificationScheduleConfig[]
 > = {
     credit_card: [
-        { days_before: 7, label: '7 days before' },
-        { days_before: 3, label: '3 days before' },
-        { days_before: 0, label: 'Day of' },
+        { days_before: 7, label: '7 days before', times: ['09:00'] },
+        { days_before: 3, label: '3 days before', times: ['09:00'] },
+        { days_before: 0, label: 'Day of', times: ['09:00'] },
     ],
     bill: [
-        { days_before: 7, label: '1 week before' },
-        { days_before: 1, label: '1 day before' },
+        { days_before: 7, label: '1 week before', times: ['09:00'] },
+        { days_before: 1, label: '1 day before', times: ['09:00'] },
     ],
-    budget_review: [{ days_before: 0, label: 'Day of' }],
+    budget_review: [
+        { days_before: 0, label: 'Day of', times: ['09:00', '13:00', '17:00'] },
+    ],
+};
+
+/**
+ * Recurrence patterns for each reminder type.
+ * Determines how often reminders should auto-regenerate after completion.
+ *
+ * - 'one_time': No recurrence, reminder expires after notifications sent
+ * - 'daily': Regenerate every day
+ * - 'weekly': Regenerate every 7 days
+ * - 'bi_weekly': Regenerate every 14 days
+ * - 'monthly': Regenerate on the same day each month (handles month-end edge cases)
+ * - 'custom': Use recurrence_interval to specify custom day interval
+ */
+export const RECURRENCE_PATTERNS: Record<ReminderTypeKey, RecurrenceType> = {
+    credit_card: 'monthly', // Credit card payments recur monthly
+    bill: 'monthly', // Bills typically recur monthly
+    budget_review: 'monthly', // Budget reviews happen monthly
 };
 
 /**
@@ -93,4 +125,47 @@ export function daysBeforeToMilliseconds(days_before: number): number {
  */
 export function millisecondsToDaysBefore(milliseconds: number): number {
     return Math.floor(milliseconds / (24 * 60 * 60 * 1000));
+}
+
+/**
+ * Get the recurrence pattern for a specific reminder type.
+ *
+ * @param reminderType - The type of reminder
+ * @returns Recurrence type ('one_time', 'daily', 'weekly', 'monthly', etc.)
+ */
+export function getRecurrencePattern(
+    reminderType: ReminderTypeKey
+): RecurrenceType {
+    return RECURRENCE_PATTERNS[reminderType] || 'one_time';
+}
+
+/**
+ * Check if a reminder type is configured for recurring reminders.
+ *
+ * @param reminderType - The type of reminder
+ * @returns True if the reminder type recurs, false if one-time
+ */
+export function isRecurring(reminderType: ReminderTypeKey): boolean {
+    return getRecurrencePattern(reminderType) !== 'one_time';
+}
+
+/**
+ * Get notification times for a specific reminder type.
+ * Extracts all times configured across all schedule entries.
+ *
+ * @param reminderType - The type of reminder
+ * @returns Array of unique notification times in 24-hour format (e.g., ['09:00', '13:00'])
+ */
+export function getNotificationTimes(reminderType: ReminderTypeKey): string[] {
+    const schedules = NOTIFICATION_SCHEDULES[reminderType];
+    if (!schedules) return [];
+
+    const timesSet = new Set<string>();
+    schedules.forEach((schedule) => {
+        if (schedule.times) {
+            schedule.times.forEach((time) => timesSet.add(time));
+        }
+    });
+
+    return Array.from(timesSet).sort();
 }

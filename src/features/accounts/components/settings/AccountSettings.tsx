@@ -6,7 +6,10 @@ import {
     deleteReminder,
     getReminderByAccount,
 } from '@/lib/eventsApi';
-import { getNotificationSchedule } from '@/lib/notificationSchedules';
+import {
+    getNotificationSchedule,
+    getRecurrencePattern,
+} from '@/lib/notificationSchedules';
 import dayjs from 'dayjs';
 import { useGlobalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -73,11 +76,15 @@ export default function AccountSettings() {
                 const notificationSchedule =
                     getNotificationSchedule('credit_card');
 
+                // Get recurrence pattern (e.g., 'monthly' for credit cards)
+                const recurrenceType = getRecurrencePattern('credit_card');
+
                 await createReminder({
                     title: `${account.display_name || account.name} Payment Due`,
                     body: `${account.display_name || account.name} Payment Due`,
                     due_at: dueDateString,
                     notify_before_schedules: notificationSchedule,
+                    recurrence_type: recurrenceType,
                     is_active: true,
                     account_id: String(account.id),
                 });
