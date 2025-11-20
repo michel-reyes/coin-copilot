@@ -1,21 +1,39 @@
 @import 'tailwindcss';
 @import 'uniwind';
 
+:root {
+    --color-system-orange: #ffaa00;
+    --color-system-orange-dark: #ffa500;
+    --color-system-orange-darker: #d1542d;
+    --color-system-health: #75c57c;
+    --color-system-health-light: #e2e3bf;
+    --color-system-health-lighter: #bce4ce;
+}
+
 @theme {
     --color-system-black: #000000;
     --color-system-white: #ffffff;
-    --color-system-background: #18171c;
-    --color-system-surface: #201f24;
+    --color-system-background-muted: #141414;
+    --color-system-surface: #1c1c1e;
     --color-system-surface-secondary: #2f2e34;
-    --color-system-border: #37363b;
-    --color-system-input: #26272b;
-    --color-system-text-secondary: #96969e;
+    --color-system-text-primary: #ffffff;
+    --color-system-text-secondary: #96959a;
+    --color-system-text-tertiary: #8e8d92;
     --color-system-text-placeholder: #606166;
-    --color-system-text-tertiary: #8b8b8d;
-    --color-system-icon: #8b8b8d;
-    --color-system-blue: #367afe;
-    --color-system-green: #13b76b;
-    --color-system-red: #fe3a30;
-    --color-system-orange: #fe9601;
-    --color-system-yellow: #fbaf23;
+    --color-system-icon: #414045;
+    --color-system-border: #373739;
+    --color-system-input: #26272b;
+    --color-system-blue: #54c3ff;
+    --color-system-blue-light: #b5d7e0;
+    --color-system-blue-dark: #5da7ff;
+    --color-system-green: #00bc74;
+    --color-system-green-dark: #00af70;
+    --color-system-green-darker: #00a26b;
+    --color-system-pink: #ff5cad;
+    --color-system-red: #f2313d;
+    --color-system-orange: #ff7813;
+    --color-system-yellow: #ffbe00;
+    --color-system-saving: #00bc74;
+    --color-system-needs: #54c3ff;
+    --color-system-wants: #ff5cad;
 }

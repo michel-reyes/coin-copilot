@@ -53,14 +53,7 @@ export function Text({
         styleWeight === 600;
 
     // Determine which font to use based on variant and bold status
-    const shouldUseSemibold =
-        isBoldFont ||
-        isBoldWeight ||
-        variant === 'largeTitle' ||
-        variant === 'title1' ||
-        variant === 'title2' ||
-        variant === 'title3' ||
-        variant === 'headline';
+    const shouldUseSemibold = isBoldFont || isBoldWeight;
 
     return (
         <RNText
@@ -68,11 +61,11 @@ export function Text({
             className={clsx(
                 // Base variant classes (lowest precedence)
                 {
-                    'text-5xl font-bold': variant === 'largeTitle',
+                    'text-[64px] font-bold': variant === 'largeTitle',
                     'text-[35px] font-bold': variant === 'title1',
                     'text-[29px] font-bold': variant === 'title2',
                     'text-[20px] font-bold': variant === 'title3',
-                    'text-[17px] font-bold tracking-wide':
+                    'text-[18px] font-bold tracking-wide':
                         variant === 'headline',
                     'text-[17px]': variant === 'body' || !variant,
                     'text-[16px]': variant === 'callout',

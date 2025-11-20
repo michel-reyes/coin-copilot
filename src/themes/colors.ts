@@ -1,18 +1,37 @@
 export default module.exports = {
     'system-black': '#000000', // Background
-    'system-white': '#FFFFFF', // Text primary
-    'system-background': '#18171C',
-    'system-surface': '#201F24',
+    'system-white': '#FFFFFF', // Foreground
+
+    //  containers
+    'system-surface': '#1C1C1E',
+    'system-background-muted': '#141414',
     'system-surface-secondary': '#2F2E34',
-    'system-border': '#37363B',
-    'system-input': '#26272B',
-    'system-text-secondary': '#96969E',
+
+    // text
+    'system-text-primary': '#FFFFFF',
+    'system-text-secondary': '#96959A',
+    'system-text-tertiary': '#8E8D92',
     'system-text-placeholder': '#606166',
-    'system-text-tertiary': '#8B8B8D',
-    'system-icon': '#8B8B8D',
-    'system-blue': '#367AFE',
-    'system-green': '#13B76B',
-    'system-red': '#FE3A30',
-    'system-orange': '#FE9601',
-    'system-yellow': '#FBAF23',
+
+    // elements
+    'system-icon': '#414045',
+    'system-border': '#373739',
+    'system-input': '#26272B',
+
+    // alternative colors
+    'system-blue': '#54C3FF',
+    'system-blue-light': '#B5D7E0',
+    'system-blue-dark': '#5DA7FF',
+    'system-green': '#00BC74',
+    'system-green-dark': '#00AF70',
+    'system-green-darker': '#00A26B',
+    'system-pink': '#FF5CAD',
+    'system-red': '#F2313D',
+    'system-orange': '#FF7813',
+    'system-yellow': '#FFBE00',
+
+    // main category
+    'system-saving': '#00BC74',
+    'system-needs': '#54C3FF',
+    'system-wants': '#FF5CAD',
 };
