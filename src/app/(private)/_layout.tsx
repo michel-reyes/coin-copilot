@@ -17,10 +17,10 @@ export default function AppLayout() {
                     headerShown: true,
                     headerBackButtonDisplayMode: 'minimal',
                     contentStyle: {
-                        backgroundColor: colors['system-background'],
+                        backgroundColor: colors['system-black'],
                     },
                     headerStyle: {
-                        backgroundColor: colors['system-background'],
+                        backgroundColor: colors['system-black'],
                     },
                 }}
             />
