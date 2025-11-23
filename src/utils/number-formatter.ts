@@ -48,14 +48,13 @@ export function formatShortCurrency(n: number, currency: string = '$') {
   );
   const num = +(n / Math.pow(1000, order)).toFixed(1);
   return `${currency}${num}${units[order]}`;
-
-  // TODO: enable when expo support Intl.NumberFormat
-
-  //   new Intl.NumberFormat('en-US', {
-  //       notation: 'compact',
-  //       compactDisplay: 'short',
-  //       style: 'currency',
-  //       currency: 'USD',
-  //       roundingMode: 'floor',
-  //   }).format(number);
 }
+
+// TODO not available at Hermes RN compiler yet
+// export const formatter = new Intl.NumberFormat('en-US', {
+//   notation: 'compact',
+//   compactDisplay: 'short',
+//   style: 'currency',
+//   currency: 'USD',
+//   roundingMode: 'floor',
+// });

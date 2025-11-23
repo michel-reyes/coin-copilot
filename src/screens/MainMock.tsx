@@ -316,7 +316,7 @@ export default function MainMock() {
             <CategoryPercentage
               label='Wants'
               currentValue={900}
-              totalValue={2730}
+              totalValue={230}
               currencyUnit='USD'
               color='wants'
             />
