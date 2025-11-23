@@ -60,7 +60,7 @@ export function ParallaxScrollView({
         ) : null}
         {headerImage}
       </Animated.View>
-      <View className='flex-1 p-8 gap-4 overflow-hidden'>{children}</View>
+      <View className='flex-1'>{children}</View>
     </Animated.ScrollView>
   );
 }
