@@ -40,14 +40,14 @@ export function formatCurrency(
   }
 }
 
-export function formatShortCurrency(n: number) {
+export function formatShortCurrency(n: number, currency: string = '$') {
   const units = ['', 'K', 'M', 'B', 'T'];
   const order = Math.min(
     Math.floor(Math.log10(Math.abs(n)) / 3),
     units.length - 1
   );
   const num = +(n / Math.pow(1000, order)).toFixed(1);
-  return `$${num}${units[order]}`;
+  return `${currency}${num}${units[order]}`;
 
   // TODO: enable when expo support Intl.NumberFormat
 

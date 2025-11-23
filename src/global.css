@@ -30,7 +30,7 @@
 }
 
 .screen-x-padding {
-  @apply px-5;
+  @apply px-4;
 }
 
 .title-y-margin {

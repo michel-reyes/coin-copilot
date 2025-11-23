@@ -1,10 +1,11 @@
 import { ParallaxScrollView, Text, View } from '@/components/commons';
 import { IconSymbol } from '@/components/os/IconSymbol';
 import colors from '@/themes/colors';
-import { formatCurrency } from '@/utils/number-formatter';
+import { formatCurrency, formatShortCurrency } from '@/utils/number-formatter';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
-import { Pressable } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Pressable, useWindowDimensions } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 function SvgComponent() {
@@ -142,49 +143,102 @@ function TitleLink({ path }: { path: string }) {
 
 function CategoryPercentage({
   label,
-  percentage,
   currentValue,
   totalValue,
+  currencyUnit,
   color,
 }: {
   label: string;
-  percentage: number;
-  currentValue: string;
-  totalValue: string;
+  currentValue: number;
+  totalValue: number;
+  currencyUnit: string;
   color: 'savings' | 'needs' | 'wants';
 }) {
+  const { width: screenWidth } = useWindowDimensions();
+  const [siblingWidth, setSiblingWidth] = useState(0);
+  const [textWidth, setTextWidth] = useState(0);
+
   const colorVariants = {
     savings: 'bg-system-savings ',
     needs: 'bg-system-needs ',
     wants: 'bg-system-wants ',
   };
 
+  // Constants based on design/global.css
+  const SCREEN_PADDING = 40; // px-5 * 2 = 20 * 2
+  const GAP = 8; // gap-2 = 8
+  const BAR_HORIZONTAL_PADDING = 24; // px-3 * 2 = 12 * 2
+
+  const maxBarWidth = screenWidth - SCREEN_PADDING - siblingWidth - GAP;
+
+  // Calculate percentage
+  const percentage = (currentValue / totalValue) * 100;
+
+  const currentValueFormatted = formatShortCurrency(currentValue, '');
+  const totalValueFormatted = formatShortCurrency(totalValue, '');
+
+  // 100% of the bar should take the full available width (maxBarWidth)
+  // So we calculate the target width based on the percentage of that max width
+  // If percentage > 100, it will be clamped by maxBarWidth logic below if we wanted strict 100% cap.
+  const targetWidth = (percentage / 100) * maxBarWidth;
+
+  // Min width is the text width + padding
+  const minWidth = textWidth + BAR_HORIZONTAL_PADDING;
+
+  // Final width calculation
+  // 1. Ensure it's at least minWidth
+  // 2. Ensure it doesn't exceed maxBarWidth
+  // 3. Use targetWidth as the desired size
+  // Note: If minWidth > maxBarWidth, we might have an overflow issue, but we'll respect minWidth to show text
+  // or we could clamp to maxBarWidth. Usually showing content is preferred.
+  // Let's clamp targetWidth between min and max.
+  let finalWidth = Math.max(minWidth, Math.min(targetWidth, maxBarWidth));
+
+  // Handle initial render where measurements might be 0
+  const isMeasuring = siblingWidth === 0 || textWidth === 0;
+
+  useEffect(() => {
+    setSiblingWidth(0);
+    setTextWidth(0);
+  }, [currentValue, totalValue, label, currencyUnit]);
+
+  if (!isMeasuring) {
+    finalWidth = Math.max(minWidth, Math.min(targetWidth, maxBarWidth));
+  }
+
   return (
     <View className='w-full'>
       <View className='w-full flex-row gap-2 items-center'>
         {/* Bar */}
         <View
-          className={`w-[200px] h-[28px] ${colorVariants[color]} rounded-xl relative flex px-3`}
+          style={{
+            width: isMeasuring ? undefined : finalWidth,
+            opacity: isMeasuring ? 0 : 1,
+          }}
+          className={`h-[28px] ${colorVariants[color]} rounded-xl relative flex px-3 justify-center`}
         >
-          <View className='flex-row items-center h-full gap-1'>
+          <View
+            className='flex-row justify-between items-center gap-1'
+            onLayout={(e) => setTextWidth(e.nativeEvent.layout.width)}
+          >
             <Text
               variant='caption1'
-              className='text-black font-semibold tracking-wider'
+              className='font-semibold text-system-black'
             >
               {label}
             </Text>
             <Text
               variant='caption1'
-              className='text-black/60 font-semibold tracking-wider'
+              className='font-semibold text-system-black/60'
             >
-              {percentage}%
+              {percentage.toFixed(0)}%
             </Text>
           </View>
         </View>
         {/* x of x */}
-        <View>
+        <View onLayout={(e) => setSiblingWidth(e.nativeEvent.layout.width)}>
           <Text variant='caption1' className='font-semibold tracking-wider'>
-            {currentValue}
+            {currentValueFormatted}
             <Text variant='caption1' color='secondaryLabel'>
               {' '}
               /
@@ -195,7 +249,7 @@ function CategoryPercentage({
             color='secondaryLabel'
             className='tracking-wider'
           >
-            {totalValue}
+            {totalValueFormatted} {currencyUnit}
           </Text>
         </View>
       </View>
@@ -239,31 +293,31 @@ export default function MainMock() {
             <StatLabel title='Main Categories' />
             <IconSymbol
               name='exclamationmark.circle.fill'
-              color={colors['system-icon']}
+              color={colors['system-icon-secondary']}
               size={18}
             />
           </View>
 
-          <View>
+          <View className='gap-1'>
             <CategoryPercentage
               label='Savings'
-              percentage={70}
-              currentValue='420'
-              totalValue='600 USD'
+              currentValue={70}
+              totalValue={80}
+              currencyUnit='USD'
               color='savings'
             />
             <CategoryPercentage
               label='Needs'
-              percentage={54}
-              currentValue='1,836'
-              totalValue='3.2k USD'
+              currentValue={200}
+              totalValue={480}
+              currencyUnit='USD'
               color='needs'
             />
             <CategoryPercentage
               label='Wants'
-              percentage={104}
-              currentValue='120'
-              totalValue='100 USD'
+              currentValue={900}
+              totalValue={2730}
+              currencyUnit='USD'
               color='wants'
             />
           </View>
