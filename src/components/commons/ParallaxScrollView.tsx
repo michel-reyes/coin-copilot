@@ -24,7 +24,6 @@ export function ParallaxScrollView({
   headerBackgroundColor,
   headerBackground,
 }: Props) {
-
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollOffset(scrollRef);
   const headerAnimatedStyle = useAnimatedStyle(() => {
@@ -34,11 +33,15 @@ export function ParallaxScrollView({
           translateY: interpolate(
             scrollOffset.value,
             [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-            [-HEADER_HEIGHT * 0.95, 0, HEADER_HEIGHT * 0.75]
+            [-HEADER_HEIGHT * 0.95, 0, 0]
           ),
         },
         {
-          scale: interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0, HEADER_HEIGHT], [1.1, 1, 1]),
+          scale: interpolate(
+            scrollOffset.value,
+            [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
+            [1.1, 1, 1]
+          ),
         },
       ],
     };
@@ -48,15 +51,22 @@ export function ParallaxScrollView({
     <Animated.ScrollView
       ref={scrollRef}
       style={{ backgroundColor: colors['system-black'], flex: 1 }}
-      scrollEventThrottle={16}>
+      scrollEventThrottle={16}
+    >
       <Animated.View
         style={[
           styles.header,
-          { backgroundColor: headerBackgroundColor?.dark || colors['system-black'] },
+          {
+            backgroundColor:
+              headerBackgroundColor?.dark || colors['system-black'],
+          },
           headerAnimatedStyle,
-        ]}>
+        ]}
+      >
         {headerBackground ? (
-          <Animated.View style={StyleSheet.absoluteFill}>{headerBackground}</Animated.View>
+          <Animated.View style={StyleSheet.absoluteFill}>
+            {headerBackground}
+          </Animated.View>
         ) : null}
         {headerImage}
       </Animated.View>
@@ -66,7 +76,6 @@ export function ParallaxScrollView({
 }
 
 const styles = StyleSheet.create({
-
   header: {
     height: HEADER_HEIGHT,
     overflow: 'hidden',
