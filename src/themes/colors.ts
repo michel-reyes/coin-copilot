@@ -32,7 +32,7 @@ export default module.exports = {
   'system-yellow': '#FFBE00',
 
   // main category
-  'system-saving': '#00BC74',
+  'system-savings': '#00BC74',
   'system-needs': '#FFBE00',
   'system-wants': '#FF7813',
 };

@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, useWindowDimensions } from 'react-native';
+import SquircleView from 'react-native-fast-squircle';
 import Svg, { Path } from 'react-native-svg';
 
 function SvgComponent() {
@@ -159,9 +160,9 @@ function CategoryPercentage({
   const [textWidth, setTextWidth] = useState(0);
 
   const colorVariants = {
-    savings: 'bg-system-savings ',
-    needs: 'bg-system-needs ',
-    wants: 'bg-system-wants ',
+    savings: colors['system-savings'],
+    needs: colors['system-needs'],
+    wants: colors['system-wants'],
   };
 
   // Constants based on design/global.css
@@ -210,15 +211,22 @@ function CategoryPercentage({
     <View className='w-full'>
       <View className='w-full flex-row gap-2 items-center'>
         {/* Bar */}
-        <View
+        <SquircleView
           style={{
-            width: isMeasuring ? undefined : finalWidth,
+            width: isMeasuring ? 0 : finalWidth,
             opacity: isMeasuring ? 0 : 1,
+            height: 28,
+            borderRadius: 11,
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colorVariants[color],
+            paddingInline: 12,
           }}
-          className={`h-[28px] ${colorVariants[color]} rounded-xl relative flex px-3 justify-center`}
+          cornerSmoothing={0.6}
         >
           <View
-            className='flex-row justify-between items-center gap-1'
+            className='flex-row grow justify-between items-center gap-1'
             onLayout={(e) => setTextWidth(e.nativeEvent.layout.width)}
           >
             <Text
@@ -234,7 +242,7 @@ function CategoryPercentage({
               {percentage.toFixed(0)}%
             </Text>
           </View>
-        </View>
+        </SquircleView>
         {/* x of x */}
         <View onLayout={(e) => setSiblingWidth(e.nativeEvent.layout.width)}>
           <Text variant='caption1' className='font-semibold tracking-wider'>
@@ -315,7 +323,7 @@ export default function MainMock() {
             />
             <CategoryPercentage
               label='Wants'
-              currentValue={900}
+              currentValue={1234}
               totalValue={230}
               currencyUnit='USD'
               color='wants'

@@ -6,4 +6,3 @@ import { Text } from './Text';
 import { View } from './View';
 
 export { Divider, ListItem, ParallaxScrollView, ScreenScrollView, Text, View };
-
