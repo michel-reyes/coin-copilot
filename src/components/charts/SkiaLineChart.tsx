@@ -228,16 +228,16 @@ export const SkiaLineChart = ({
             cx={lastPoint.x}
             cy={lastPoint.y}
             r={dataPointRadius}
-            color='#fff'
+            color={dataPointBackgroundColor}
             style='fill'
           />
           <Circle
             cx={lastPoint.x}
             cy={lastPoint.y}
             r={dataPointRadius}
-            color={lineColor}
+            color='#fff'
             style='stroke'
-            strokeWidth={2}
+            strokeWidth={strokeWidth}
           />
         </Group>
       )}

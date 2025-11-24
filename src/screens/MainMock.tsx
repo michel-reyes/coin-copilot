@@ -266,6 +266,23 @@ function CategoryPercentage({
   );
 }
 
+function AutoWidthChart({
+  children,
+}: {
+  children: (width: number) => React.ReactNode;
+}) {
+  const [width, setWidth] = useState(0);
+
+  return (
+    <View
+      className='flex-1 h-full'
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+    >
+      {width > 0 && children(width)}
+    </View>
+  );
+}
+
 export default function MainMock() {
   const dataIncome = [
     { value: 40 },
@@ -382,8 +399,8 @@ export default function MainMock() {
               </View>
 
               {/* line2 */}
-              <View className='flex flex-row items-center justify-between mt-5'>
-                <View className='gap-1 grow'>
+              <View className='flex flex-row items-center justify-between mt-4 gap-2'>
+                <View className='gap-1 w-[60%]'>
                   <Text
                     variant='title2'
                     className='font-semibold tracking-wider'
@@ -398,18 +415,22 @@ export default function MainMock() {
                     Last 30 days
                   </Text>
                 </View>
-                <View className='ml-auto flex-1 grow'>
-                  <SkiaLineChart
-                    data={dataIncome}
-                    width={120}
-                    height={60}
-                    lineColor='#666'
-                    strokeWidth={2}
-                    dataPointRadius={4}
-                    dataPointBackgroundColor='#000'
-                    backgroundRectMin={10}
-                    backgroundRectMax={50}
-                  />
+                <View className='ml-auto flex-1 w-[40%]'>
+                  <AutoWidthChart>
+                    {(width) => (
+                      <SkiaLineChart
+                        data={dataIncome}
+                        width={width}
+                        height={60}
+                        lineColor={colors['system-green']}
+                        strokeWidth={2}
+                        dataPointRadius={4}
+                        dataPointBackgroundColor='#000'
+                        backgroundRectMin={10}
+                        backgroundRectMax={50}
+                      />
+                    )}
+                  </AutoWidthChart>
                 </View>
               </View>
             </View>
@@ -447,13 +468,13 @@ export default function MainMock() {
               </View>
 
               {/* line2 */}
-              <View className='flex flex-row items-center justify-between mt-5'>
-                <View className='gap-1 grow'>
+              <View className='flex flex-row items-center justify-between mt-4 gap-2'>
+                <View className='gap-1 w-[60%]'>
                   <Text
                     variant='title2'
                     className='font-semibold tracking-wider'
                   >
-                    {formatCurrency(8562)}
+                    {formatCurrency(856)}
                   </Text>
                   <Text
                     variant='subhead'
@@ -463,18 +484,22 @@ export default function MainMock() {
                     Current month
                   </Text>
                 </View>
-                <View className='ml-auto flex-1'>
-                  <SkiaLineChart
-                    data={dataExpense}
-                    width={120}
-                    height={60}
-                    lineColor='#666'
-                    strokeWidth={2}
-                    dataPointRadius={4}
-                    dataPointBackgroundColor='#000'
-                    backgroundRectMin={34}
-                    backgroundRectMax={120}
-                  />
+                <View className='ml-auto flex-1 grow w-[40%]'>
+                  <AutoWidthChart>
+                    {(width) => (
+                      <SkiaLineChart
+                        data={dataExpense}
+                        width={width}
+                        height={60}
+                        lineColor={colors['system-orange']}
+                        strokeWidth={2}
+                        dataPointRadius={4}
+                        dataPointBackgroundColor='#000'
+                        backgroundRectMin={34}
+                        backgroundRectMax={120}
+                      />
+                    )}
+                  </AutoWidthChart>
                 </View>
               </View>
             </View>
