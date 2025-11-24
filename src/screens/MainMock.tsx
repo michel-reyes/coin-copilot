@@ -1,3 +1,4 @@
+import { SkiaLineChart } from '@/components/charts/SkiaLineChart';
 import { ParallaxScrollView, Text, View } from '@/components/commons';
 import { IconSymbol } from '@/components/os/IconSymbol';
 import colors from '@/themes/colors';
@@ -266,6 +267,15 @@ function CategoryPercentage({
 }
 
 export default function MainMock() {
+  const data = [
+    { value: 40 },
+    { value: 35 },
+    { value: 45 },
+    { value: 60 },
+    { value: 30 },
+    { value: 5 },
+  ];
+
   return (
     <ParallaxScrollView
       headerImage={<SvgComponent />}
@@ -296,6 +306,7 @@ export default function MainMock() {
           </View>
         </View>
 
+        {/* percentage bars */}
         <View className='title-y-margin'>
           <View className='flex-row gap-2'>
             <StatLabel title='Main Categories' />
@@ -329,6 +340,70 @@ export default function MainMock() {
               color='wants'
             />
           </View>
+        </View>
+
+        <View className='title-y-margin'>
+          <SquircleView
+            style={{
+              borderRadius: 24,
+              backgroundColor: colors['system-surface'],
+              padding: 18,
+            }}
+            cornerSmoothing={0.6}
+          >
+            <View>
+              {/* line1 */}
+              <View className='flex flex-row items-center justify-between'>
+                <View className='flex-row items-center gap-1.5'>
+                  <IconSymbol
+                    name='digitalcrown.arrow.counterclockwise.fill'
+                    color={colors['system-white']}
+                    size={14}
+                  />
+                  <Text className='font-semibold tracking-wider'>Income</Text>
+                </View>
+                <View>
+                  <IconSymbol
+                    name='chevron.right'
+                    color={colors['system-icon-secondary']}
+                    size={18}
+                  />
+                </View>
+              </View>
+
+              {/* line2 */}
+              <View className='flex flex-row items-center justify-between mt-5'>
+                <View className='gap-1 grow'>
+                  <Text
+                    variant='title2'
+                    className='font-semibold tracking-wider'
+                  >
+                    {formatCurrency(64)}
+                  </Text>
+                  <Text
+                    variant='subhead'
+                    color='secondaryLabel'
+                    className='tracking-wide'
+                  >
+                    Last 30 days
+                  </Text>
+                </View>
+                <View className='ml-auto flex-1'>
+                  <SkiaLineChart
+                    data={data}
+                    width={120}
+                    height={60}
+                    lineColor='#666'
+                    strokeWidth={2}
+                    dataPointRadius={4}
+                    dataPointBackgroundColor='#000'
+                    backgroundRectMin={10}
+                    backgroundRectMax={50}
+                  />
+                </View>
+              </View>
+            </View>
+          </SquircleView>
         </View>
       </View>
     </ParallaxScrollView>
