@@ -267,13 +267,22 @@ function CategoryPercentage({
 }
 
 export default function MainMock() {
-  const data = [
+  const dataIncome = [
     { value: 40 },
     { value: 35 },
     { value: 45 },
     { value: 60 },
     { value: 30 },
     { value: 5 },
+  ];
+
+  const dataExpense = [
+    { value: 65 },
+    { value: 98 },
+    { value: 23 },
+    { value: 88 },
+    { value: 54 },
+    { value: 99 },
   ];
 
   return (
@@ -342,6 +351,7 @@ export default function MainMock() {
           </View>
         </View>
 
+        {/* income */}
         <View className='title-y-margin'>
           <SquircleView
             style={{
@@ -378,7 +388,7 @@ export default function MainMock() {
                     variant='title2'
                     className='font-semibold tracking-wider'
                   >
-                    {formatCurrency(64)}
+                    {formatCurrency(1562)}
                   </Text>
                   <Text
                     variant='subhead'
@@ -388,9 +398,9 @@ export default function MainMock() {
                     Last 30 days
                   </Text>
                 </View>
-                <View className='ml-auto flex-1'>
+                <View className='ml-auto flex-1 grow'>
                   <SkiaLineChart
-                    data={data}
+                    data={dataIncome}
                     width={120}
                     height={60}
                     lineColor='#666'
@@ -399,6 +409,71 @@ export default function MainMock() {
                     dataPointBackgroundColor='#000'
                     backgroundRectMin={10}
                     backgroundRectMax={50}
+                  />
+                </View>
+              </View>
+            </View>
+          </SquircleView>
+        </View>
+
+        {/* expense */}
+        <View className='-mt-4'>
+          <SquircleView
+            style={{
+              borderRadius: 24,
+              backgroundColor: colors['system-surface'],
+              padding: 18,
+            }}
+            cornerSmoothing={0.6}
+          >
+            <View>
+              {/* line1 */}
+              <View className='flex flex-row items-center justify-between'>
+                <View className='flex-row items-center gap-1.5'>
+                  <IconSymbol
+                    name='digitalcrown.arrow.counterclockwise.fill'
+                    color={colors['system-white']}
+                    size={14}
+                  />
+                  <Text className='font-semibold tracking-wider'>Expenses</Text>
+                </View>
+                <View>
+                  <IconSymbol
+                    name='chevron.right'
+                    color={colors['system-icon-secondary']}
+                    size={18}
+                  />
+                </View>
+              </View>
+
+              {/* line2 */}
+              <View className='flex flex-row items-center justify-between mt-5'>
+                <View className='gap-1 grow'>
+                  <Text
+                    variant='title2'
+                    className='font-semibold tracking-wider'
+                  >
+                    {formatCurrency(8562)}
+                  </Text>
+                  <Text
+                    variant='subhead'
+                    color='secondaryLabel'
+                    className='tracking-wide'
+                  >
+                    Current month
+                  </Text>
+                </View>
+                <View className='ml-auto flex-1'>
+                  <SkiaLineChart
+                    data={dataExpense}
+                    width={120}
+                    height={60}
+                    lineColor='#666'
+                    strokeWidth={2}
+                    dataPointRadius={4}
+                    dataPointBackgroundColor='#000'
+                    backgroundRectMin={34}
+                    backgroundRectMax={120}
                   />
                 </View>
               </View>
