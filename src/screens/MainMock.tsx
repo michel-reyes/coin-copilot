@@ -1,5 +1,11 @@
-import { SkiaLineChart } from '@/components/charts/SkiaLineChart';
 import { ParallaxScrollView, Text, View } from '@/components/commons';
+import {
+  SummaryCard,
+  SummaryCardBody,
+  SummaryCardChart,
+  SummaryCardHeader,
+  SummaryCardValue,
+} from '@/components/dashboard/SummaryCard';
 import { IconSymbol } from '@/components/os/IconSymbol';
 import colors from '@/themes/colors';
 import { formatCurrency, formatShortCurrency } from '@/utils/number-formatter';
@@ -97,7 +103,7 @@ function NumberSymbol({ value }: { value: string }) {
 
   // Extract symbol and number $123
   let symbol = formattedValue.match(/[a-zA-Z]+/g)?.join('') || '';
-  const number = formattedValue.match(/[\d,.]+/g)?.join('') || '';
+  const number = formattedValue.match(/[-\d,.]+/g)?.join('') || '';
 
   return (
     <Text
@@ -266,23 +272,6 @@ function CategoryPercentage({
   );
 }
 
-function AutoWidthChart({
-  children,
-}: {
-  children: (width: number) => React.ReactNode;
-}) {
-  const [width, setWidth] = useState(0);
-
-  return (
-    <View
-      className='flex-1 h-full'
-      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
-    >
-      {width > 0 && children(width)}
-    </View>
-  );
-}
-
 export default function MainMock() {
   const dataIncome = [
     { value: 40 },
@@ -368,142 +357,56 @@ export default function MainMock() {
           </View>
         </View>
 
-        {/* income */}
         <View className='title-y-margin'>
-          <SquircleView
-            style={{
-              borderRadius: 24,
-              backgroundColor: colors['system-surface'],
-              padding: 18,
-            }}
-            cornerSmoothing={0.6}
-          >
-            <View>
-              {/* line1 */}
-              <View className='flex flex-row items-center justify-between'>
-                <View className='flex-row items-center gap-1.5'>
-                  <IconSymbol
-                    name='digitalcrown.arrow.counterclockwise.fill'
-                    color={colors['system-white']}
-                    size={14}
-                  />
-                  <Text className='font-semibold tracking-wider'>Income</Text>
-                </View>
-                <View>
-                  <IconSymbol
-                    name='chevron.right'
-                    color={colors['system-icon-secondary']}
-                    size={18}
-                  />
-                </View>
-              </View>
-
-              {/* line2 */}
-              <View className='flex flex-row items-center justify-between mt-4 gap-2'>
-                <View className='gap-1 w-[60%]'>
-                  <Text
-                    variant='title2'
-                    className='font-semibold tracking-wider'
-                  >
-                    {formatCurrency(1562)}
-                  </Text>
-                  <Text
-                    variant='subhead'
-                    color='secondaryLabel'
-                    className='tracking-wide'
-                  >
-                    Last 30 days
-                  </Text>
-                </View>
-                <View className='ml-auto flex-1 w-[40%]'>
-                  <AutoWidthChart>
-                    {(width) => (
-                      <SkiaLineChart
-                        data={dataIncome}
-                        width={width}
-                        height={60}
-                        lineColor={colors['system-green']}
-                        strokeWidth={2}
-                        dataPointRadius={4}
-                        dataPointBackgroundColor='#000'
-                        backgroundRectMin={10}
-                        backgroundRectMax={50}
-                      />
-                    )}
-                  </AutoWidthChart>
-                </View>
-              </View>
-            </View>
-          </SquircleView>
+          {/* income */}
+          <SummaryCard>
+            <SummaryCardHeader title='Income' />
+            <SummaryCardBody>
+              <SummaryCardValue value={1562.06} subtitle='Last 30 days' />
+              <SummaryCardChart
+                data={dataIncome}
+                color={colors['system-green']}
+                backgroundRectMin={10}
+                backgroundRectMax={50}
+              />
+            </SummaryCardBody>
+          </SummaryCard>
         </View>
 
         {/* expense */}
         <View className='-mt-4'>
-          <SquircleView
-            style={{
-              borderRadius: 24,
-              backgroundColor: colors['system-surface'],
-              padding: 18,
-            }}
-            cornerSmoothing={0.6}
-          >
-            <View>
-              {/* line1 */}
-              <View className='flex flex-row items-center justify-between'>
-                <View className='flex-row items-center gap-1.5'>
-                  <IconSymbol
-                    name='digitalcrown.arrow.counterclockwise.fill'
-                    color={colors['system-white']}
-                    size={14}
-                  />
-                  <Text className='font-semibold tracking-wider'>Expenses</Text>
-                </View>
-                <View>
-                  <IconSymbol
-                    name='chevron.right'
-                    color={colors['system-icon-secondary']}
-                    size={18}
-                  />
-                </View>
-              </View>
+          <SummaryCard>
+            <SummaryCardHeader title='Expenses' />
+            <SummaryCardBody>
+              <SummaryCardValue value={856.76} subtitle='Current month' />
+              <SummaryCardChart
+                data={dataExpense}
+                color={colors['system-red']}
+                backgroundRectMin={34}
+                backgroundRectMax={120}
+              />
+            </SummaryCardBody>
+          </SummaryCard>
+        </View>
 
-              {/* line2 */}
-              <View className='flex flex-row items-center justify-between mt-4 gap-2'>
-                <View className='gap-1 w-[60%]'>
-                  <Text
-                    variant='title2'
-                    className='font-semibold tracking-wider'
-                  >
-                    {formatCurrency(856)}
-                  </Text>
-                  <Text
-                    variant='subhead'
-                    color='secondaryLabel'
-                    className='tracking-wide'
-                  >
-                    Current month
-                  </Text>
-                </View>
-                <View className='ml-auto flex-1 grow w-[40%]'>
-                  <AutoWidthChart>
-                    {(width) => (
-                      <SkiaLineChart
-                        data={dataExpense}
-                        width={width}
-                        height={60}
-                        lineColor={colors['system-orange']}
-                        strokeWidth={2}
-                        dataPointRadius={4}
-                        dataPointBackgroundColor='#000'
-                        backgroundRectMin={34}
-                        backgroundRectMax={120}
-                      />
-                    )}
-                  </AutoWidthChart>
-                </View>
-              </View>
-            </View>
-          </SquircleView>
+        <View className='title-y-margin'>
+          <View className='flex-row flex-1 items-end-safe justify-between title-y-margin'>
+            <Title title='Burn rate' />
+            <TitleLink path='(private)' />
+          </View>
+
+          <View className='stat-card-gap flex-row   '>
+            <StatCard
+              label='Average'
+              value={<NumberSymbol value='38' />}
+              className='grow'
+            />
+            <StatCard
+              label='Difference'
+              value={<NumberSymbol value='-19' />}
+              className='grow'
+            />
+          </View>
         </View>
       </View>
     </ParallaxScrollView>
