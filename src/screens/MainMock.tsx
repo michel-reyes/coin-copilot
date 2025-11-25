@@ -1,3 +1,4 @@
+import { GreenRiverChart } from '@/components/charts/GreenRiverChart';
 import { ParallaxScrollView, Text, View } from '@/components/commons';
 import {
   SummaryCard,
@@ -14,6 +15,7 @@ import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, useWindowDimensions } from 'react-native';
 import SquircleView from 'react-native-fast-squircle';
+
 import Svg, { Path } from 'react-native-svg';
 
 function SvgComponent() {
@@ -273,6 +275,8 @@ function CategoryPercentage({
 }
 
 export default function MainMock() {
+  const { width: screenWidth } = useWindowDimensions();
+
   const dataIncome = [
     { value: 40 },
     { value: 35 },
@@ -289,6 +293,45 @@ export default function MainMock() {
     { value: 88 },
     { value: 54 },
     { value: 99 },
+  ];
+
+  const data1 = [
+    { value: 70 },
+    { value: 20 },
+    { value: 50 },
+    { value: 40 },
+    { value: 48 },
+    { value: 38 },
+    { value: 38 },
+  ];
+  // white line
+  const data2 = [
+    { value: 50, label: 'Tue 11' },
+    { value: 10, label: 'Wed 12' },
+    { value: 45, label: 'Thu 13' },
+    { value: 30, label: 'Fri 14' },
+    { value: 45, label: 'Sat 15' },
+    { value: 28, label: 'Sun 16' },
+    { value: 33, label: 'Mon 17' },
+  ];
+
+  const data3 = [
+    { value: 40 },
+    { value: 5 },
+    { value: 30 },
+    { value: 20 },
+    { value: 30 },
+    { value: 22 },
+    { value: 23 },
+  ];
+  const data4 = [
+    { value: 30 },
+    { value: 0 },
+    { value: 20 },
+    { value: 10 },
+    { value: 20 },
+    { value: 10 },
+    { value: 10 },
   ];
 
   return (
@@ -395,10 +438,10 @@ export default function MainMock() {
             <TitleLink path='(private)' />
           </View>
 
-          <View className='stat-card-gap flex-row   '>
+          <View className='stat-card-gap flex-row mb-4'>
             <StatCard
               label='Average'
-              value={<NumberSymbol value='38' />}
+              value={<NumberSymbol value='84' />}
               className='grow'
             />
             <StatCard
@@ -409,6 +452,61 @@ export default function MainMock() {
           </View>
         </View>
       </View>
+      <View className='w-full items-center'>
+        <GreenRiverChart
+          data1={data1}
+          data2={data2}
+          data3={data3}
+          data4={data4}
+          width={screenWidth}
+          height={250}
+        />
+      </View>
+      <View className='mb-52' />
     </ParallaxScrollView>
   );
 }
+
+const burnRateData = [
+  // Warmup period (stable/high burn)
+  { date: '2025-09-01', income: 0, netWorth: 10000 },
+  { date: '2025-09-02', income: 0, netWorth: 9800 },
+  { date: '2025-09-03', income: 500, netWorth: 9650 }, // Noise
+  { date: '2025-09-04', income: 0, netWorth: 9400 },
+  { date: '2025-09-05', income: 0, netWorth: 9200 },
+  { date: '2025-09-06', income: 200, netWorth: 9020 }, // Noise
+  { date: '2025-09-07', income: 0, netWorth: 8800 },
+  { date: '2025-09-08', income: 0, netWorth: 8600 },
+  { date: '2025-09-09', income: 800, netWorth: 8480 }, // Noise
+  { date: '2025-09-10', income: 0, netWorth: 8200 },
+  { date: '2025-09-11', income: 0, netWorth: 8000 },
+  { date: '2025-09-12', income: 0, netWorth: 7800 },
+  { date: '2025-09-13', income: 0, netWorth: 7600 },
+  { date: '2025-09-14', income: 0, netWorth: 7400 },
+
+  // Start of visible chart
+  // Dip: Burn rate drops
+  { date: '2025-09-15', income: 0, netWorth: 72500 },
+  { date: '2025-09-16', income: 100, netWorth: 71600 },
+  { date: '2025-09-17', income: 0, netWorth: 70800 },
+  { date: '2025-09-18', income: 0, netWorth: 70200 }, // Low point
+  { date: '2025-09-19', income: 0, netWorth: 69600 },
+  { date: '2025-09-20', income: 0, netWorth: 69000 },
+  { date: '2025-09-21', income: 0, netWorth: 68400 },
+
+  // Rise: Burn rate increases rapidly with some noise
+  { date: '2025-09-22', income: 0, netWorth: 67400 },
+  { date: '2025-09-23', income: 500, netWorth: 66400 }, // Income spike
+  { date: '2025-09-24', income: 0, netWorth: 63900 },
+  { date: '2025-09-25', income: 0, netWorth: 61400 },
+  { date: '2025-09-26', income: 0, netWorth: 13456 },
+  { date: '2025-09-27', income: 1000, netWorth: 56000 }, // Income spike
+  { date: '2025-09-28', income: 1234, netWorth: 51500 },
+  { date: '2025-09-29', income: 0, netWorth: 48200 },
+  { date: '2025-09-30', income: 0, netWorth: 45000 },
+
+  // Slight drop at end
+  { date: '2025-10-01', income: 987, netWorth: 42000 },
+  { date: '2025-10-02', income: 0, netWorth: 39500 },
+  { date: '2025-10-03', income: 0, netWorth: 37500 },
+];
