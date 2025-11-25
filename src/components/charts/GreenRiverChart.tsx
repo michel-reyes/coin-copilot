@@ -13,6 +13,20 @@ import { ViewStyle } from 'react-native';
 interface DataPoint {
   value: number;
   label?: string;
+  // Dot customization
+  showDot?: boolean;
+  dotColor?: string;
+  dotBorderColor?: string;
+  dotBorderWidth?: number;
+  dotRadius?: number;
+}
+
+interface RiverColors {
+  layer1?: string;
+  layer2?: string;
+  layer3?: string;
+  layer4?: string;
+  line?: string;
 }
 
 interface GreenRiverChartProps {
@@ -23,6 +37,9 @@ interface GreenRiverChartProps {
   width: number;
   height: number;
   style?: ViewStyle;
+  riverColors?: RiverColors;
+  startMargin?: number;
+  endMargin?: number;
 }
 
 export const GreenRiverChart = ({
@@ -33,7 +50,19 @@ export const GreenRiverChart = ({
   width,
   height,
   style,
+  riverColors = {},
+  startMargin = 0,
+  endMargin = 0,
 }: GreenRiverChartProps) => {
+  // Default colors
+  const colors = {
+    layer1: riverColors.layer1 ?? '#00A26B',
+    layer2: riverColors.layer2 ?? '#00AF70',
+    layer3: riverColors.layer3 ?? '#00BC74',
+    layer4: riverColors.layer4 ?? '#000000',
+    line: riverColors.line ?? 'white',
+  };
+
   // Load font for X-axis labels
   const font = useFont(
     require('../../../assets/fonts/SFProRounded-Regular.ttf'),
@@ -60,7 +89,8 @@ export const GreenRiverChart = ({
   const minVal = 0;
 
   const getX = (index: number, total: number) => {
-    return (index / (total - 1)) * width;
+    const availableWidth = width - startMargin - endMargin;
+    return startMargin + (index / (total - 1)) * availableWidth;
   };
 
   const getY = (value: number) => {
@@ -81,7 +111,13 @@ export const GreenRiverChart = ({
       y: getY(d.value),
     }));
 
-    path.moveTo(points[0].x, points[0].y);
+    if (closePath) {
+      // Start from left edge (flat extension)
+      path.moveTo(0, points[0].y);
+      path.lineTo(points[0].x, points[0].y);
+    } else {
+      path.moveTo(points[0].x, points[0].y);
+    }
 
     for (let i = 0; i < points.length - 1; i++) {
       const p0 = points[Math.max(i - 1, 0)];
@@ -99,6 +135,9 @@ export const GreenRiverChart = ({
     }
 
     if (closePath) {
+      // Extend to right edge (flat extension)
+      path.lineTo(width, points[points.length - 1].y);
+      // Close to bottom corners
       path.lineTo(width, CHART_HEIGHT);
       path.lineTo(0, CHART_HEIGHT);
       path.close();
@@ -115,7 +154,17 @@ export const GreenRiverChart = ({
       layer4: generateSmoothPath(data4, true),
       line: generateSmoothPath(data2, false), // White line follows data2
     };
-  }, [data1, data2, data3, data4, width, CHART_HEIGHT, maxVal]);
+  }, [
+    data1,
+    data2,
+    data3,
+    data4,
+    width,
+    CHART_HEIGHT,
+    maxVal,
+    startMargin,
+    endMargin,
+  ]);
 
   // Data points for the white line (data2)
   const dataPoints = useMemo(() => {
@@ -126,27 +175,33 @@ export const GreenRiverChart = ({
       label: d.label,
       isLast: i === data2.length - 1,
       index: i, // Add index for label logic
+      // Customization props
+      showDot: d.showDot ?? true,
+      dotColor: d.dotColor,
+      dotBorderColor: d.dotBorderColor,
+      dotBorderWidth: d.dotBorderWidth,
+      dotRadius: d.dotRadius,
     }));
-  }, [data2, width, CHART_HEIGHT, maxVal]);
+  }, [data2, width, CHART_HEIGHT, maxVal, startMargin, endMargin]);
 
   return (
     <Canvas style={[{ width, height }, style]}>
       {/* Layer 1: Bottom/Largest - Darkest Green */}
-      <Path path={paths.layer1} color='#00A26B' style='fill' />
+      <Path path={paths.layer1} color={colors.layer1} style='fill' />
 
       {/* Layer 2: Middle - Medium Green */}
-      <Path path={paths.layer2} color='#00AF70' style='fill' />
+      <Path path={paths.layer2} color={colors.layer2} style='fill' />
 
       {/* Layer 3: Top - Lightest Green */}
-      <Path path={paths.layer3} color='#00BC74' style='fill' />
+      <Path path={paths.layer3} color={colors.layer3} style='fill' />
 
       {/* Layer 4: River Bed - Black */}
-      <Path path={paths.layer4} color='#000000' style='fill' />
+      <Path path={paths.layer4} color={colors.layer4} style='fill' />
 
       {/* White Line on top of Layer 2 boundary */}
       <Path
         path={paths.line}
-        color='white'
+        color={colors.line}
         style='stroke'
         strokeWidth={3}
         strokeCap='round'
@@ -154,61 +209,67 @@ export const GreenRiverChart = ({
       />
 
       {/* Data Points */}
-      {dataPoints.map((point, index) => (
-        <Group key={index}>
-          {point.isLast ? (
-            // Last point: Large solid white circle
-            <Circle cx={point.x} cy={point.y} r={6} color='white' />
-          ) : (
-            // Other points: Black circle with white stroke
-            <Group>
+      {dataPoints.map((point, index) => {
+        if (!point.showDot) return null;
+
+        // Default styles based on "isLast" if not overridden
+        const radius = point.dotRadius ?? 5;
+        const fillColor = point.dotColor ?? 'black';
+        const strokeColor = point.dotBorderColor ?? 'white';
+        const strokeWidth = point.dotBorderWidth ?? 2;
+
+        return (
+          <Group key={index}>
+            {/* Stroke Circle (if width > 0) */}
+            {strokeWidth > 0 && (
               <Circle
                 cx={point.x}
                 cy={point.y}
-                r={5}
-                color='white'
+                r={radius}
+                color={strokeColor}
                 style='stroke'
-                strokeWidth={2}
+                strokeWidth={strokeWidth}
               />
-              <Circle cx={point.x} cy={point.y} r={5} color='black' />
-            </Group>
-          )}
+            )}
+            {/* Fill Circle */}
+            <Circle cx={point.x} cy={point.y} r={radius} color={fillColor} />
 
-          {/* X-Axis Labels */}
-          {point.label && font && fontBold && (
-            <Group>
-              {/* Day Name (e.g., "Tue") */}
-              <Text
-                x={(() => {
-                  const text = point.label.split(' ')[0];
-                  const textWidth = font.getTextWidth(text);
-                  if (index === 0) return 0; // Left align first
-                  if (index === dataPoints.length - 1) return width - textWidth; // Right align last
-                  return point.x - textWidth / 2; // Center others
-                })()}
-                y={CHART_HEIGHT + 15}
-                text={point.label.split(' ')[0]}
-                font={font}
-                color='#8E8E93' // Secondary label color
-              />
-              {/* Date Number (e.g., "11") */}
-              <Text
-                x={(() => {
-                  const text = point.label.split(' ')[1];
-                  const textWidth = fontBold.getTextWidth(text);
-                  if (index === 0) return 0; // Left align first
-                  if (index === dataPoints.length - 1) return width - textWidth; // Right align last
-                  return point.x - textWidth / 2; // Center others
-                })()}
-                y={CHART_HEIGHT + 32}
-                text={point.label.split(' ')[1]}
-                font={fontBold}
-                color='white'
-              />
-            </Group>
-          )}
-        </Group>
-      ))}
+            {/* X-Axis Labels */}
+            {point.label && font && fontBold && (
+              <Group>
+                {/* Day Name (e.g., "Tue") */}
+                <Text
+                  x={(() => {
+                    const text = point.label.split(' ')[0];
+                    const textWidth = font.getTextWidth(text);
+                    const centeredX = point.x - textWidth / 2;
+                    // Clamp to edges with small padding
+                    return Math.max(0, Math.min(centeredX, width - textWidth));
+                  })()}
+                  y={CHART_HEIGHT + 15}
+                  text={point.label.split(' ')[0]}
+                  font={font}
+                  color='#8E8E93' // Secondary label color
+                />
+                {/* Date Number (e.g., "11") */}
+                <Text
+                  x={(() => {
+                    const text = point.label.split(' ')[1];
+                    const textWidth = fontBold.getTextWidth(text);
+                    const centeredX = point.x - textWidth / 2;
+                    // Clamp to edges with small padding
+                    return Math.max(0, Math.min(centeredX, width - textWidth));
+                  })()}
+                  y={CHART_HEIGHT + 32}
+                  text={point.label.split(' ')[1]}
+                  font={fontBold}
+                  color='white'
+                />
+              </Group>
+            )}
+          </Group>
+        );
+      })}
     </Canvas>
   );
 };

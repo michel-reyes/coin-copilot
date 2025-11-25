@@ -306,20 +306,33 @@ export default function MainMock() {
   ];
   // white line
   const data2 = [
-    { value: 50, label: 'Tue 11' },
-    { value: 10, label: 'Wed 12' },
-    { value: 45, label: 'Thu 13' },
+    { value: 50, label: 'Wed 12', showDot: false },
+    {
+      value: 10,
+      label: 'Tue 11',
+      showDot: true,
+      dotColor: '#FF5555',
+      dotBorderColor: 'white',
+      dotBorderWidth: 2,
+    },
+    { value: 30, label: 'Thu 13' },
     { value: 30, label: 'Fri 14' },
     { value: 45, label: 'Sat 15' },
     { value: 28, label: 'Sun 16' },
-    { value: 33, label: 'Mon 17' },
+    {
+      value: 33,
+      label: 'Mon 17',
+      dotColor: '#000000',
+      dotBorderColor: 'white',
+      dotBorderWidth: 2,
+    },
   ];
 
   const data3 = [
     { value: 40 },
-    { value: 5 },
+    { value: 10 },
+    { value: 40 },
     { value: 30 },
-    { value: 20 },
     { value: 30 },
     { value: 22 },
     { value: 23 },
@@ -327,7 +340,7 @@ export default function MainMock() {
   const data4 = [
     { value: 30 },
     { value: 0 },
-    { value: 20 },
+    { value: 19 },
     { value: 10 },
     { value: 20 },
     { value: 10 },
@@ -450,16 +463,20 @@ export default function MainMock() {
               className='grow'
             />
           </View>
+          <Text variant='caption1' color='secondaryLabel'>
+            MAY 21 - NOV 16
+          </Text>
         </View>
       </View>
-      <View className='w-full items-center'>
+      <View className='w-full items-center -mt-10'>
         <GreenRiverChart
           data1={data1}
           data2={data2}
           data3={data3}
           data4={data4}
           width={screenWidth}
-          height={250}
+          height={230}
+          endMargin={20}
         />
       </View>
       <View className='mb-52' />
