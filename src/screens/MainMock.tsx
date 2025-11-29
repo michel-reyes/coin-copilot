@@ -527,7 +527,7 @@ export default function MainMock() {
                             <SummaryCardHeader title='Income' />
                             <SummaryCardBody>
                                 <SummaryCardValue
-                                    value={9999.06}
+                                    value={15099}
                                     subtitle='Last 30 days'
                                 />
                                 <SummaryCardChart

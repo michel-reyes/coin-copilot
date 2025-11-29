@@ -7,6 +7,7 @@ export type ThemedTextProps = TextProps & {
         | 'title1'
         | 'title2'
         | 'title3'
+        | 'title3l'
         | 'headline'
         | 'body'
         | 'callout'
@@ -65,6 +66,7 @@ export function Text({
                     'text-[64px] font-bold': variant === 'largeTitle',
                     'text-[35px] font-bold': variant === 'title1',
                     'text-[29px] font-bold': variant === 'title2',
+                    'text-[26px] font-bold': variant === 'title3l',
                     'text-[20px] font-bold': variant === 'title3',
                     'text-[18px] font-bold tracking-wide':
                         variant === 'headline',
