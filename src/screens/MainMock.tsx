@@ -1,3 +1,4 @@
+import { ExpenditureTrendChart } from '@/components/charts/ExpenditureTrendChart';
 import { GreenRiverChart } from '@/components/charts/GreenRiverChart';
 import { ParallaxScrollView, Text, View } from '@/components/commons';
 import {
@@ -9,15 +10,23 @@ import {
 } from '@/components/dashboard/SummaryCard';
 import { IconSymbol } from '@/components/os/IconSymbol';
 import colors from '@/themes/colors';
+import {
+    calculateExpenditure,
+    filterTransactionsByDateRange,
+} from '@/utils/expenditure';
 import { formatCurrency, formatShortCurrency } from '@/utils/number-formatter';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, useWindowDimensions } from 'react-native';
 import SquircleView from 'react-native-fast-squircle';
 
 import Svg, { Path } from 'react-native-svg';
+
+// Import mock transaction data
+import mockData from '@/api/_mock/db.json';
+import { Transaction } from '@/api/types/apiTypes';
 
 function SvgSmileFace() {
     return (
@@ -384,6 +393,51 @@ function AccountItem({
 export default function MainMock() {
     const { width: screenWidth } = useWindowDimensions();
 
+    // Calculate expenditure data from mock transactions (Oct-Nov 2025)
+    const expenditureResult = useMemo(() => {
+        // Cast through unknown to handle JSON null values vs undefined in TypeScript types
+        const transactions = mockData.transactions
+            .transactions as unknown as Transaction[];
+        // Filter to Oct-Nov 2025 (last 2 months of data)
+        const filteredTransactions = filterTransactionsByDateRange(
+            transactions,
+            '2025-10-01',
+            '2025-11-08'
+        );
+        return calculateExpenditure(filteredTransactions);
+    }, []);
+
+    // Calculate daily income from transactions
+    const incomeStats = useMemo(() => {
+        const transactions = mockData.transactions
+            .transactions as unknown as Transaction[];
+        const filteredTransactions = filterTransactionsByDateRange(
+            transactions,
+            '2025-10-01',
+            '2025-11-08'
+        );
+
+        // Sum income transactions
+        const totalIncome = filteredTransactions
+            .filter((tx) => tx.is_income && !tx.exclude_from_totals)
+            .reduce((sum, tx) => sum + Math.abs(tx.to_base), 0);
+
+        // Calculate days in period
+        const startDate = new Date('2025-10-01');
+        const endDate = new Date('2025-11-08');
+        const days =
+            Math.ceil(
+                (endDate.getTime() - startDate.getTime()) /
+                    (1000 * 60 * 60 * 24)
+            ) + 1;
+
+        return {
+            totalIncome,
+            dailyIncome: totalIncome / days,
+            days,
+        };
+    }, []);
+
     const dataIncome = [
         { value: 40 },
         { value: 35 },
@@ -600,6 +654,267 @@ export default function MainMock() {
                     , this is how much you really spend each day based on your
                     Money In and Money Saved
                 </Text>
+            </View>
+
+            {/* Expenditure Trend Section */}
+            <View className='title-y-margin px-4'>
+                <View className='flex-row items-center justify-between title-y-margin'>
+                    <Title title='Expenditure Trend' />
+                    <TitleLink path='(private)' />
+                </View>
+
+                <Text variant='subhead' color='secondaryLabel' className='mb-2'>
+                    <Text
+                        style={{ color: '#FF6B35' }}
+                        className='font-semibold'
+                    >
+                        Orange Line (Signal)
+                    </Text>{' '}
+                    vs. <Text color='tertiaryLabel'>Grey Area (Noise)</Text>
+                </Text>
+
+                <View className='stat-card-gap flex-row mb-4'>
+                    <View className='grow'>
+                        <StatLabel title='Average Expenditure' />
+                        <NumberSymbol
+                            value={expenditureResult.averageExpenditure.toFixed(
+                                0
+                            )}
+                        />
+                        <Text
+                            variant='caption2'
+                            color='tertiaryLabel'
+                            className='mt-1'
+                        >
+                            Your typical daily spending over this period
+                        </Text>
+                    </View>
+                    <View className='grow'>
+                        <StatLabel title='Weekly Change' />
+                        <Text
+                            variant='title2'
+                            color={
+                                expenditureResult.delta > 0
+                                    ? 'error'
+                                    : 'success'
+                            }
+                            className='font-semibold'
+                        >
+                            {expenditureResult.delta > 0 ? '+' : ''}
+                            {formatShortCurrency(expenditureResult.delta)}
+                        </Text>
+                        <Text
+                            variant='caption2'
+                            color='tertiaryLabel'
+                            className='mt-1'
+                        >
+                            {expenditureResult.delta > 0 ? (
+                                <Text variant='caption2' color='error'>
+                                    Spending increased{' '}
+                                </Text>
+                            ) : (
+                                <Text variant='caption2' color='success'>
+                                    Spending decreased{' '}
+                                </Text>
+                            )}
+                            vs last week
+                        </Text>
+                    </View>
+                </View>
+
+                <Text
+                    variant='caption1'
+                    color='secondaryLabel'
+                    className='mb-2'
+                >
+                    {expenditureResult.dateRange.start.toUpperCase()} -{' '}
+                    {expenditureResult.dateRange.end.toUpperCase()}
+                </Text>
+            </View>
+
+            <View className='w-full items-center'>
+                <ExpenditureTrendChart
+                    data={expenditureResult.data}
+                    width={screenWidth}
+                    height={220}
+                />
+
+                {/* Key Metrics Cards */}
+                <View className='px-4 mt-4 flex-row gap-4'>
+                    <View className='flex-1 bg-system-surface p-3 rounded-xl'>
+                        <Text
+                            variant='caption1'
+                            style={{ color: '#FF6B35' }}
+                            className='font-semibold mb-1'
+                        >
+                            Expenditure
+                        </Text>
+                        <Text variant='title3' className='font-semibold'>
+                            {formatShortCurrency(
+                                expenditureResult.currentTrend
+                            )}
+                            <Text variant='caption1' color='secondaryLabel'>
+                                {' '}
+                                /day
+                            </Text>
+                        </Text>
+                        <Text
+                            variant='caption2'
+                            color='tertiaryLabel'
+                            className='mt-1'
+                        >
+                            Current smoothed daily burn rate
+                        </Text>
+                    </View>
+                    <View className='flex-1 bg-system-surface p-3 rounded-xl'>
+                        <Text
+                            variant='caption1'
+                            color='success'
+                            className='font-semibold mb-1'
+                        >
+                            Income
+                        </Text>
+                        <Text variant='title3' className='font-semibold'>
+                            {formatShortCurrency(incomeStats.dailyIncome)}
+                            <Text variant='caption1' color='secondaryLabel'>
+                                {' '}
+                                /day
+                            </Text>
+                        </Text>
+                        <Text
+                            variant='caption2'
+                            color='tertiaryLabel'
+                            className='mt-1'
+                        >
+                            Average daily income earned
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Net Daily Balance */}
+                <View className='px-4 mt-3 w-full'>
+                    <View className='bg-system-surface p-3 rounded-xl'>
+                        <Text
+                            variant='caption1'
+                            color='secondaryLabel'
+                            className='font-semibold mb-1'
+                        >
+                            Net Daily Balance
+                        </Text>
+                        <Text
+                            variant='title3'
+                            color={
+                                incomeStats.dailyIncome -
+                                    expenditureResult.currentTrend >
+                                0
+                                    ? 'success'
+                                    : 'error'
+                            }
+                            className='font-semibold'
+                        >
+                            {incomeStats.dailyIncome -
+                                expenditureResult.currentTrend >
+                            0
+                                ? '+'
+                                : ''}
+                            {formatShortCurrency(
+                                incomeStats.dailyIncome -
+                                    expenditureResult.currentTrend
+                            )}
+                            <Text variant='caption1' color='secondaryLabel'>
+                                {' '}
+                                /day
+                            </Text>
+                        </Text>
+                        <Text
+                            variant='caption2'
+                            color='tertiaryLabel'
+                            className='mt-1'
+                        >
+                            {incomeStats.dailyIncome -
+                                expenditureResult.currentTrend >
+                            0
+                                ? 'You are saving money daily'
+                                : 'You are spending more than you earn'}
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Explanation Cards */}
+                <View className='px-4 mt-4 flex-row gap-4'>
+                    <View className='flex-1 bg-system-surface p-3 rounded-xl'>
+                        <Text
+                            variant='caption1'
+                            color='secondaryLabel'
+                            className='font-semibold mb-1'
+                        >
+                            Why is the grey area spiky?
+                        </Text>
+                        <Text variant='caption2' color='tertiaryLabel'>
+                            That is the raw calculation. Some days you spend $0,
+                            other days you pay rent ($1500). That's "noise."
+                        </Text>
+                    </View>
+                    <View className='flex-1 bg-system-surface p-3 rounded-xl'>
+                        <Text
+                            variant='caption1'
+                            style={{ color: '#FF6B35' }}
+                            className='font-semibold mb-1'
+                        >
+                            Why follow the Orange Line?
+                        </Text>
+                        <Text variant='caption2' color='tertiaryLabel'>
+                            It averages out the spikes. It tells you if your
+                            lifestyle is getting more expensive or efficient.
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Color Legend Explanation */}
+                <View className='px-4 mt-3 w-full'>
+                    <View className='bg-system-surface p-3 rounded-xl'>
+                        <Text
+                            variant='caption1'
+                            color='secondaryLabel'
+                            className='font-semibold mb-2'
+                        >
+                            Understanding the Colors
+                        </Text>
+                        <View className='flex-row items-center gap-2 mb-1'>
+                            <View
+                                style={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: 6,
+                                    backgroundColor: colors['system-red'],
+                                }}
+                            />
+                            <Text variant='caption2' color='tertiaryLabel'>
+                                <Text variant='caption2' color='error'>
+                                    Red
+                                </Text>{' '}
+                                = Spending increased (bad) - you're burning more
+                                money
+                            </Text>
+                        </View>
+                        <View className='flex-row items-center gap-2'>
+                            <View
+                                style={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: 6,
+                                    backgroundColor: colors['system-green'],
+                                }}
+                            />
+                            <Text variant='caption2' color='tertiaryLabel'>
+                                <Text variant='caption2' color='success'>
+                                    Green
+                                </Text>{' '}
+                                = Spending decreased (good) - you're saving more
+                            </Text>
+                        </View>
+                    </View>
+                </View>
             </View>
 
             {/* Accounts */}
