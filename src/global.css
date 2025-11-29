@@ -2,46 +2,46 @@
 @import 'uniwind';
 
 @theme {
-  --color-system-black: #000000;
-  --color-system-white: #ffffff;
-  --color-system-background-muted: #141414;
-  --color-system-surface: #1c1c1e;
-  --color-system-surface-secondary: #2f2e34;
-  --color-system-text-primary: #ffffff;
-  --color-system-text-secondary: #96959a;
-  --color-system-text-tertiary: #8e8d92;
-  --color-system-text-placeholder: #606166;
-  --color-system-icon: #414045;
-  --color-system-border: #373739;
-  --color-system-input: #26272b;
-  --color-system-blue: #54c3ff;
-  --color-system-blue-light: #b5d7e0;
-  --color-system-blue-dark: #5da7ff;
-  --color-system-green: #00bc74;
-  --color-system-green-dark: #00af70;
-  --color-system-green-darker: #00a26b;
-  --color-system-pink: #ff5cad;
-  --color-system-red: #f2313d;
-  --color-system-orange: #ff7813;
-  --color-system-yellow: #ffbe00;
-  --color-system-savings: #00bc74;
-  --color-system-needs: #ffbe00;
-  --color-system-wants: #ff7813;
+    --color-system-black: #000000;
+    --color-system-white: #ffffff;
+    --color-system-background-muted: #141414;
+    --color-system-surface: #1c1c1e;
+    --color-system-surface-secondary: #2f2e34;
+    --color-system-text-primary: #ffffff;
+    --color-system-text-secondary: #96959a;
+    --color-system-text-tertiary: #8e8d92;
+    --color-system-text-placeholder: #606166;
+    --color-system-icon: #414045;
+    --color-system-border: #373739;
+    --color-system-input: #26272b;
+    --color-system-blue: #54c3ff;
+    --color-system-blue-light: #b5d7e0;
+    --color-system-blue-dark: #5da7ff;
+    --color-system-green: #00bc74;
+    --color-system-green-dark: #00af70;
+    --color-system-green-darker: #00a26b;
+    --color-system-pink: #ff5cad;
+    --color-system-red: #f2313d;
+    --color-system-orange: #ff7813;
+    --color-system-yellow: #ffbe00;
+    --color-system-savings: #00bc74;
+    --color-system-needs: #ffbe00;
+    --color-system-wants: #ff7813;
 }
 
 .screen-x-padding {
-  @apply px-4;
+    @apply px-4;
 }
 
 .title-y-margin {
-  @apply mb-8;
-  @apply mt-8;
+    @apply mb-8;
+    @apply mt-8;
 }
 
 .stat-card-gap {
-  @apply gap-6;
+    @apply gap-6;
 }
 
 .stat-card_internal-margin {
-  @apply mb-2.5;
+    @apply mb-2.5;
 }

@@ -16,24 +16,22 @@ function SymbolNumberDecimal({ value }: { value: string | number }) {
   const [number, decimal] = formattedValue.slice(1).split('.');
 
   return (
-    <Text
-      variant='title2'
-      color='label'
-      className='tracking-wide font-semibold'
-    >
-      <Text
-        variant='title3'
-        color='secondaryLabel'
-        className='tracking-widest align-text-top'
-      >
-        {symbol}
+    <View className='flex-row items-end'>
+      <Text variant='subhead' color='secondaryLabel' className='mb-1'>
+        {symbol}{' '}
       </Text>
-      {number}
-      <Text variant='title3' color='secondaryLabel' className='tracking-wide'>
+      <Text
+        variant='title2'
+        color='label'
+        className='tracking-wide font-semibold'
+      >
+        {number}
+      </Text>
+      <Text variant='title2' color='tertiaryLabel' className='tracking-wide'>
         {'.'}
         {decimal}
       </Text>
-    </Text>
+    </View>
   );
 }
 
@@ -63,6 +61,8 @@ export function SummaryCard({ children }: { children: React.ReactNode }) {
         borderRadius: 24,
         backgroundColor: colors['system-surface'],
         padding: 18,
+        flex: 1,
+        width: '50%',
       }}
       cornerSmoothing={0.6}
     >
@@ -81,18 +81,13 @@ export function SummaryCardHeader({
   return (
     <View className='flex flex-row items-center justify-between'>
       <View className='flex-row items-center gap-1.5'>
-        <IconSymbol
-          name={icon as any}
-          color={colors['system-white']}
-          size={14}
-        />
         <Text className='tracking-wider'>{title}</Text>
       </View>
       <View>
         <IconSymbol
           name='chevron.right'
           color={colors['system-icon-secondary']}
-          size={18}
+          size={16}
         />
       </View>
     </View>
@@ -100,11 +95,7 @@ export function SummaryCardHeader({
 }
 
 export function SummaryCardBody({ children }: { children: React.ReactNode }) {
-  return (
-    <View className='flex flex-row items-center justify-between mt-4 gap-2'>
-      {children}
-    </View>
-  );
+  return <View className='flex gap-4'>{children}</View>;
 }
 
 export function SummaryCardValue({
@@ -115,10 +106,9 @@ export function SummaryCardValue({
   subtitle: string;
 }) {
   return (
-    <View className='gap-1 w-[60%]'>
-      <Text variant='title2' className='font-semibold tracking-wider'>
-        <SymbolNumberDecimal value={value} />
-      </Text>
+    <View className='gap-1 mt-6 flex-1'>
+      <SymbolNumberDecimal value={value} />
+
       <Text variant='subhead' color='secondaryLabel' className='tracking-wide'>
         {subtitle}
       </Text>
@@ -138,7 +128,7 @@ export function SummaryCardChart({
   backgroundRectMax: number;
 }) {
   return (
-    <View className='ml-auto flex-1 w-[40%]'>
+    <View>
       <AutoWidthChart>
         {(width) => (
           <SkiaLineChart
@@ -146,7 +136,7 @@ export function SummaryCardChart({
             width={width}
             height={60}
             lineColor={color}
-            strokeWidth={2}
+            strokeWidth={1}
             dataPointRadius={4}
             dataPointBackgroundColor='#000'
             backgroundRectMin={backgroundRectMin}

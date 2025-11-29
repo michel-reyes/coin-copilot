@@ -50,7 +50,7 @@ export const SkiaLineChart = ({
   dataPointBorderColor, // Defaults to lineColor if not provided
   backgroundColor = 'rgba(255, 255, 255, 0.05)',
 
-  strokeWidth = 3,
+  strokeWidth = 2,
   dataPointRadius = 6,
 
   yAxisMin,
@@ -207,7 +207,7 @@ export const SkiaLineChart = ({
             r={dataPointRadius}
             color={effectiveDataPointBorderColor}
             style='stroke'
-            strokeWidth={2}
+            strokeWidth={strokeWidth}
           />
         </Group>
       ))}
@@ -216,13 +216,13 @@ export const SkiaLineChart = ({
       {lastPoint && (
         <Group>
           {/* Halo */}
-          <Circle
+          {/* <Circle
             cx={lastPoint.x}
             cy={lastPoint.y}
             r={dataPointRadius * 2.5}
             color={lineColor}
-            opacity={0.3}
-          />
+            opacity={0.2}
+          /> */}
           {/* Inner solid circle */}
           <Circle
             cx={lastPoint.x}
