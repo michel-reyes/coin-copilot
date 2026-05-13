@@ -1,53 +1,53 @@
 export function formatCurrency(
-  value: string | number,
-  abs: boolean = false,
-  removeFraction: boolean = false,
-  style: 'currency' | 'decimal' = 'currency',
-  notation: 'standard' | 'compact' = 'standard',
-  currencyDisplay: 'symbol' | 'narrowSymbol' | 'code' | 'name' = 'symbol'
+    value: string | number,
+    abs: boolean = false,
+    removeFraction: boolean = false,
+    style: 'currency' | 'decimal' = 'currency',
+    notation: 'standard' | 'compact' = 'standard',
+    currencyDisplay: 'symbol' | 'narrowSymbol' | 'code' | 'name' = 'symbol'
 ): string | number {
-  // Convert string to number if necessary
-  let number = typeof value === 'string' ? parseFloat(value) : value;
+    // Convert string to number if necessary
+    let number = typeof value === 'string' ? parseFloat(value) : value;
 
-  // Make an absolute value if necessary
-  if (abs) {
-    number = Math.abs(number);
-  }
+    // Make an absolute value if necessary
+    if (abs) {
+        number = Math.abs(number);
+    }
 
-  // Check if the input is a valid number
-  if (isNaN(number)) {
-    throw new Error('Invalid number input');
-  }
+    // Check if the input is a valid number
+    if (isNaN(number)) {
+        throw new Error('Invalid number input');
+    }
 
-  // Use Intl.NumberFormat to format the number as currency
-  const formattedString = new Intl.NumberFormat('en-US', {
-    style: style,
-    currency: 'USD',
-    minimumFractionDigits: !removeFraction ? 2 : 0,
-    maximumFractionDigits: !removeFraction ? 2 : 0,
-    notation: notation,
-    currencyDisplay: currencyDisplay,
-  }).format(number);
+    // Use Intl.NumberFormat to format the number as currency
+    const formattedString = new Intl.NumberFormat('en-US', {
+        style: style,
+        currency: 'USD',
+        minimumFractionDigits: !removeFraction ? 2 : 0,
+        maximumFractionDigits: !removeFraction ? 2 : 0,
+        notation: notation,
+        currencyDisplay: currencyDisplay,
+    }).format(number);
 
-  // Return string for currency style, number for decimal style
-  if (style === 'currency') {
-    return formattedString;
-  } else {
-    // For decimal style, convert to number
-    // Remove any non-numeric characters except decimal point
-    const numericString = formattedString.replace(/[^0-9.-]/g, '');
-    return parseFloat(numericString);
-  }
+    // Return string for currency style, number for decimal style
+    if (style === 'currency') {
+        return formattedString;
+    } else {
+        // For decimal style, convert to number
+        // Remove any non-numeric characters except decimal point
+        const numericString = formattedString.replace(/[^0-9.-]/g, '');
+        return parseFloat(numericString);
+    }
 }
 
 export function formatShortCurrency(n: number, currency: string = '$') {
-  const units = ['', 'K', 'M', 'B', 'T'];
-  const order = Math.min(
-    Math.floor(Math.log10(Math.abs(n)) / 3),
-    units.length - 1
-  );
-  const num = +(n / Math.pow(1000, order)).toFixed(1);
-  return `${currency}${num}${units[order]}`;
+    const units = ['', 'K', 'M', 'B', 'T'];
+    const order = Math.min(
+        Math.floor(Math.log10(Math.abs(n)) / 3),
+        units.length - 1
+    );
+    const num = +(n / Math.pow(1000, order)).toFixed(1);
+    return `${currency}${num}${units[order]}`;
 }
 
 // TODO not available at Hermes RN compiler yet
